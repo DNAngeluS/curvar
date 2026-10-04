@@ -1,0 +1,111 @@
+name: Actualizar datos y publicar
+
+on:
+  schedule:
+    # 18:30 en Buenos Aires (UTC-3, sin horario de verano), de lunes a viernes.
+    - cron: '30 21 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Actualizar aunque sea fuera de horario (precios intradía)'
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Solo calcular y mostrar el reporte, sin commit ni deploy'
+        type: boolean
+        default: false
+  push:
+    # Cambios manuales a la página o a los datos (por ejemplo, un PR del agente): solo redeploy.
+    branches: [main]
+    paths: ['index.html', 'data.json']
+
+permissions:
+  contents: write
+  issues: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: curva-en-pesos
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      changed: ${{ steps.update.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Tests
+        run: npm test
+      - name: Actualizar data.json
+        id: update
+        env:
+          FORCE: ${{ inputs.force }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: node scripts/update.mjs
+      - name: Commit de data.json
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git commit -m "data: actualización ${GITHUB_RUN_ID} ($(date -u +%F))"
+          git push
+      - name: Abrir issue si requiere revisión
+        if: steps.update.outputs.needs_review == 'true' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create curva-revision --color D93F0B --description "Requiere criterio: instrumento nuevo, REM, feriados o avisos del script" 2>/dev/null || true
+          existing=$(gh issue list --label curva-revision --state open --json number --jq 'length')
+          if [ "$existing" = "0" ]; then
+            gh issue create --label curva-revision --title "Curva en Pesos: requiere revisión ($(date -u +%F))" --body-file review.md
+          else
+            gh issue comment "$(gh issue list --label curva-revision --state open --json number --jq '.[0].number')" --body-file review.md
+          fi
+      - name: Abrir issue si falló la actualización
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create curva-fallo --color B60205 --description "La actualización automática falló" 2>/dev/null || true
+          body="La corrida falló: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          existing=$(gh issue list --label curva-fallo --state open --json number --jq 'length')
+          if [ "$existing" = "0" ]; then
+            gh issue create --label curva-fallo --title "Curva en Pesos: falló la actualización ($(date -u +%F))" --body "$body"
+          else
+            gh issue comment "$(gh issue list --label curva-fallo --state open --json number --jq '.[0].number')" --body "$body"
+          fi
+
+  deploy:
+    needs: update
+    # Corre si update tuvo éxito o se salteó (push); nunca en dry-run.
+    if: ${{ !cancelled() && (needs.update.result == 'success' || needs.update.result == 'skipped') && inputs.dry_run != true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # ref: main (y no el SHA del evento) para incluir el commit que acaba de hacer el job update.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Armar sitio
+        run: |
+          mkdir site
+          cp index.html data.json site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

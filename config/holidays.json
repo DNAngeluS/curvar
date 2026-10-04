@@ -1,0 +1,23 @@
+{
+  "_nota": "Feriados nacionales de Argentina que cierran el mercado. Los usa el script para calcular asOf y settle (T+1). Si un feriado falta, el script igual no publica: sin cambios de precios no hay commit. Revisar contra fuente oficial cada año.",
+  "verifiedOn": "2026-10-04",
+  "coverageThrough": "2027-05-31",
+  "sources": [
+    "https://www.infobae.com/sociedad/2026/09/07/cuando-son-los-proximos-feriados-y-fines-de-semana-largos-en-2026/",
+    "https://www.somosohlala.com/actualidad/feriados-2027-en-argentina-calendario-completo-con-todos-los-fines-de-semana-largos-nid28072026"
+  ],
+  "pendiente": "Confirmar con decreto oficial (Boletín Oficial / argentina.gob.ar) los feriados trasladables de junio a noviembre de 2027 y cualquier día no laborable con fines turísticos de 2027, y cargarlos antes de la fecha de coverageThrough.",
+  "dates": [
+    "2026-10-12",
+    "2026-11-23",
+    "2026-12-08",
+    "2026-12-25",
+    "2027-01-01",
+    "2027-02-08",
+    "2027-02-09",
+    "2027-03-24",
+    "2027-03-26",
+    "2027-04-02",
+    "2027-05-25"
+  ]
+}

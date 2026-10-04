@@ -1,0 +1,414 @@
+<!doctype html><html lang="es"><head><meta charset=utf8><title>Curva en Pesos</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: encabezado con fecha y tres lecturas clave, pestañas por familia de instrumento, gráfico de curva sobre tabla ordenable. */
+:root{
+  --bg:#EDF1F4; --surface:#FFFFFF; --ink:#0D1A2B; --muted:#586A7E; --line:#D3DCE4; --grid:#E4EAEF;
+  --accent:#0B6E8C; --cer:#B05F14; --up:#12775A; --down:#B3261E;
+  --f-display:'Bricolage Grotesque',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0A1320; --surface:#111E2F; --ink:#E5ECF4; --muted:#8DA0B5; --line:#23354A; --grid:#1A293B;
+  --accent:#4CC3E6; --cer:#EDA765; --up:#4FD1A5; --down:#FF8F86; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0A1320; --surface:#111E2F; --ink:#E5ECF4; --muted:#8DA0B5; --line:#23354A; --grid:#1A293B;
+  --accent:#4CC3E6; --cer:#EDA765; --up:#4FD1A5; --down:#FF8F86; color-scheme:dark;}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-display);padding-inline:16px;padding-block:20px 40px;line-height:1.45}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+h1{font-size:clamp(1.6rem,4.5vw,2.3rem);font-weight:800;letter-spacing:-.02em;line-height:1.05;margin:0;text-wrap:balance}
+.stamp{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);text-align:right}
+.stamp b{color:var(--ink);font-weight:600}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.read{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.read span{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.read strong{font-family:var(--f-mono);font-size:1.35rem;font-weight:600}
+.read small{color:var(--muted);font-size:.8rem}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{font:inherit;font-weight:600;font-size:.95rem;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:10px 14px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabs button:focus-visible,th button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.panel{display:flex;flex-direction:column;gap:16px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+.card h2{font-size:1rem;font-weight:600;margin:0 0 4px}
+.card p.sub{margin:0 0 8px;color:var(--muted);font-size:.84rem}
+.legend{display:flex;gap:16px;font-size:.8rem;color:var(--muted);margin-bottom:4px}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:6px;background:var(--accent);vertical-align:-1px}
+.legend i.sq{border-radius:0}.legend i.ci{border-radius:50%}
+.legend i.cer{background:var(--cer)}
+svg.chart{width:100%;height:auto;display:block}
+svg .grid{stroke:var(--grid);stroke-width:1}
+svg .axis{stroke:var(--line);stroke-width:1}
+svg text{fill:var(--muted);font-family:var(--f-mono);font-size:10px}
+svg text.pt{fill:var(--ink);font-size:10px;font-weight:600}
+svg text.ttl{font-family:var(--f-display);font-size:10px}
+.legend i.ln{width:18px;height:0;border-top:2px dashed var(--ink);background:none;border-radius:0;vertical-align:3px}
+svg .curve{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-dasharray:5 4;opacity:.7}
+svg .gap{stroke:var(--muted);stroke-width:1;opacity:.55}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th,td{padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--grid)}
+th:first-child,td:first-child{text-align:left}
+th{font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--surface)}
+th button{font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;background:none;border:0;cursor:pointer;padding:0}
+th button[data-dir="1"]::after{content:" ▲";font-size:.6rem}
+th button[data-dir="-1"]::after{content:" ▼";font-size:.6rem}
+td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+td:first-child{font-family:var(--f-display);font-weight:600}
+td.k{font-family:var(--f-display);color:var(--muted);font-size:.78rem}
+.up{color:var(--up)}.down{color:var(--down)}
+.hi{font-weight:600}
+.bar{display:inline-block;height:6px;background:var(--accent);border-radius:1px;margin-right:6px;vertical-align:middle}
+.bar.cer{background:var(--cer)}
+.note{font-size:.8rem;color:var(--muted);margin:8px 0 0}
+.err{padding:14px;border:1px solid var(--down);border-radius:6px;color:var(--down)}
+.ctl{display:flex;flex-wrap:wrap;gap:12px 20px;margin:4px 0 14px}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:.78rem;color:var(--muted);min-width:0}
+.fld input{font-family:var(--f-mono);font-size:.95rem;width:120px;padding:7px 9px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:4px}
+.fld input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.card .read{background:var(--bg)}
+.card .strip{margin-bottom:14px}
+td.hz{font-family:var(--f-display);font-weight:800;font-size:1rem;vertical-align:top;border-right:1px solid var(--line)}
+tr.first td{border-top:2px solid var(--line)}
+td.best{font-weight:600;outline:1px solid var(--accent);outline-offset:-2px}
+footer{font-size:.78rem;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+footer a{color:var(--accent)}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Curva en Pesos</h1>
+    <div class="stamp" id="stamp">Cargando datos…</div>
+  </header>
+  <section class="strip" id="strip" aria-label="Lecturas clave"></section>
+  <div role="tablist" class="tabs" aria-label="Familia de instrumentos">
+    <button role="tab" id="tab-fija" aria-selected="true" aria-controls="p-fija">Tasa fija</button>
+    <button role="tab" id="tab-cer" aria-selected="false" aria-controls="p-cer">CER</button>
+    <button role="tab" id="tab-tamar" aria-selected="false" aria-controls="p-tamar">TAMAR y dual</button>
+    <button role="tab" id="tab-rank" aria-selected="false" aria-controls="p-rank">Mejor por plazo</button>
+  </div>
+  <section class="panel" id="p-fija" role="tabpanel" aria-labelledby="tab-fija"></section>
+  <section class="panel" id="p-cer" role="tabpanel" aria-labelledby="tab-cer" hidden></section>
+  <section class="panel" id="p-tamar" role="tabpanel" aria-labelledby="tab-tamar" hidden></section>
+  <section class="panel" id="p-rank" role="tabpanel" aria-labelledby="tab-rank" hidden></section>
+  <footer>
+    <div>Precios: data912 (panel BYMA, cierre del día hábil anterior, con demora de hasta 2 horas). CER y BADLAR: <a href="https://www.bcra.gob.ar/en/central-bank-api-catalog/" target="_blank" rel="noopener">API del BCRA</a>. Valores al vencimiento: resumen de negociación IAMC del 26/05/2026 y ficha de la S29E7 en Boston Asset Management.</div>
+    <div id="src"></div>
+    <div>Cálculo de tasa fija: rendimiento = VN al vencimiento ÷ precio − 1 sobre los días hasta el vencimiento desde la liquidación (T+1). TNA con base 365, TEA compuesta anual, TEM compuesta a 30 días. Material informativo, no es una recomendación de inversión.</div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var DAY = 86400000;
+  var fixedMeta = [], cerMeta = [], varMeta = [];
+
+  function ts(s){var a=s.split('-').map(Number);return Date.UTC(a[0],a[1]-1,a[2]);}
+  var nf = function(n,d){return n==null||isNaN(n)?'—':n.toLocaleString('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d});};
+  var pc = function(n,d){return n==null||isNaN(n)?'—':nf(n*100,d==null?2:d)+'%';};
+  var fd = function(t){return new Date(t).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'2-digit',timeZone:'UTC'}).replace(/\./g,'');};
+  function chg(v){var c=v>0?'up':v<0?'down':'';return '<span class="'+c+'">'+(v>0?'+':'')+nf(v,2)+'%</span>';}
+
+  function sortable(host, cols, rows, key, dir){
+    var s = host._s || (host._s = {k:key,dir:dir||1});
+    var sorted = rows.slice().sort(function(a,b){
+      var x=a[s.k], y=b[s.k]; if(x==null) x=-Infinity; if(y==null) y=-Infinity;
+      return (x>y?1:x<y?-1:0)*s.dir;
+    });
+    var h='<table><thead><tr>'+cols.map(function(c){
+      return '<th><button type="button" data-k="'+c.k+'"'+(s.k===c.k?' data-dir="'+s.dir+'"':'')+'>'+c.l+'</button></th>';
+    }).join('')+'</tr></thead><tbody>'+sorted.map(function(r){
+      return '<tr>'+cols.map(function(c){return '<td class="'+(c.cls||'')+'">'+c.f(r)+'</td>';}).join('')+'</tr>';
+    }).join('')+'</tbody></table>';
+    host.innerHTML=h;
+    host.querySelectorAll('th button').forEach(function(b){
+      b.addEventListener('click',function(){
+        var k=b.getAttribute('data-k');
+        if(s.k===k) s.dir=-s.dir; else {s.k=k;s.dir=1;}
+        sortable(host,cols,rows,s.k,s.dir);
+      });
+    });
+  }
+
+  function niceTicks(lo,hi,n){
+    var span=hi-lo, step=Math.pow(10,Math.floor(Math.log10(span/n))), err=span/n/step;
+    step*= err>=5?5:err>=2?2:1;
+    var a=Math.floor(lo/step)*step, out=[];
+    for(var v=a; v<=hi+step*0.001; v+=step) out.push(+v.toFixed(10));
+    return out;
+  }
+
+  function polyfit(xs,ys,deg){
+    var s=Math.max.apply(null,xs), n=deg+1, i, j, k, A=[];
+    for(i=0;i<n;i++){A.push([]);for(j=0;j<=n;j++)A[i].push(0);}
+    xs.forEach(function(x,idx){
+      var u=x/s;
+      for(i=0;i<n;i++){for(j=0;j<n;j++)A[i][j]+=Math.pow(u,i+j);A[i][n]+=ys[idx]*Math.pow(u,i);}
+    });
+    for(i=0;i<n;i++){
+      var p=i; for(k=i+1;k<n;k++) if(Math.abs(A[k][i])>Math.abs(A[p][i])) p=k;
+      var t=A[i];A[i]=A[p];A[p]=t;
+      for(k=i+1;k<n;k++){var f=A[k][i]/A[i][i];for(j=i;j<=n;j++)A[k][j]-=f*A[i][j];}
+    }
+    var c=new Array(n);
+    for(i=n-1;i>=0;i--){var sum=A[i][n];for(j=i+1;j<n;j++)sum-=A[i][j]*c[j];c[i]=sum/A[i][i];}
+    return function(x){var u=x/s,y=0;for(var q=0;q<n;q++)y+=c[q]*Math.pow(u,q);return y;};
+  }
+  function vsf(v){
+    if(v==null||isNaN(v)) return '—';
+    var x=v*100;
+    return '<span class="'+(x>0.004?'up':x<-0.004?'down':'')+'">'+(x>0?'+':'')+nf(x,2)+' pp</span>';
+  }
+
+  function scatter(host, pts, o){
+    var W=640,H=280,L=48,R=18,T=14,B=36;
+    var xs=pts.map(function(p){return p.x;}), ys=pts.map(function(p){return p.y;}), all=ys.slice();
+    var xmin=Math.min.apply(null,xs), xlast=Math.max.apply(null,xs), curve=[];
+    if(o.f){for(var i=0;i<=60;i++){var cx=xmin+(xlast-xmin)*i/60, cy=o.f(cx);curve.push([cx,cy]);all.push(cy);}}
+    var xmax=Math.ceil(xlast/50)*50+10;
+    var lo=Math.min.apply(null,all), hi=Math.max.apply(null,all), pad=(hi-lo)*0.1;
+    var yt=niceTicks(lo-pad, hi+pad, 5);
+    var ylo=yt[0], yhi=yt[yt.length-1];
+    var X=function(v){return L+(v/xmax)*(W-L-R);}, Y=function(v){return T+(1-(v-ylo)/(yhi-ylo))*(H-T-B);};
+    var xstep = xmax>400?100:50, g='';
+    yt.forEach(function(v){g+='<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'"/><text x="'+(L-6)+'" y="'+(Y(v)+3)+'" text-anchor="end">'+o.fy(v)+'</text>';});
+    for(var x=0;x<=xmax;x+=xstep){g+='<text x="'+X(x)+'" y="'+(H-B+14)+'" text-anchor="middle">'+x+'</text>';}
+    g+='<line class="axis" x1="'+L+'" x2="'+(W-R)+'" y1="'+(H-B)+'" y2="'+(H-B)+'"/>';
+    g+='<text class="ttl" x="'+((L+W-R)/2)+'" y="'+(H-4)+'" text-anchor="middle">Plazo al vencimiento (días)</text>';
+    g+='<text class="ttl" x="'+(L)+'" y="9">'+o.yl+'</text>';
+    if(curve.length){
+      g+='<path class="curve" d="'+curve.map(function(c,i){return (i?'L':'M')+X(c[0]).toFixed(1)+' '+Y(c[1]).toFixed(1);}).join(' ')+'"/>';
+      pts.forEach(function(p){g+='<line class="gap" x1="'+X(p.x)+'" x2="'+X(p.x)+'" y1="'+Y(p.y)+'" y2="'+Y(o.f(p.x))+'"/>';});
+    }
+    pts.slice().sort(function(a,b){return a.x-b.x;}).forEach(function(p,i){
+      var cx=X(p.x), cy=Y(p.y), col=p.cer?'var(--cer)':'var(--accent)';
+      var shape = p.sq ? '<rect x="'+(cx-4.5)+'" y="'+(cy-4.5)+'" width="9" height="9" fill="'+col+'"/>' : '<circle cx="'+cx+'" cy="'+cy+'" r="5" fill="'+col+'"/>';
+      var above = o.f ? p.y>=o.f(p.x) : i%2===0, ly = above? cy-9 : cy+16;
+      var anchor = cx>W-60?'end':'middle';
+      g+=shape+'<text class="pt" x="'+cx+'" y="'+ly+'" text-anchor="'+anchor+'">'+p.t+'</text>';
+    });
+    host.innerHTML='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+o.aria+'">'+g+'</svg>';
+  }
+
+  // Ranking por horizonte: valor esperado de 1 peso invertido hoy, medido a 30/60/90/180 días.
+  function buildRank(D, fixed, cer, cerOn, CL){
+    var $ = function(i){return document.getElementById(i);};
+    var A = D.assumptions;
+    var HZ = [{d:30,l:'1 mes'},{d:60,l:'2 meses'},{d:90,l:'3 meses'},{d:180,l:'6 meses'}];
+    var pool = fixed.map(function(r){return Object.assign({type:'fixed',tipo:r.kind},r);})
+      .concat(cer.filter(function(r){return r.emi;}).map(function(r){return Object.assign({type:'cer',tipo:'CER'},r);}));
+
+    function value(r,H,shift,m,reinv){
+      var tail=function(left){return 1+reinv/100*Math.max(left,0)/365;};
+      if(r.type==='fixed'){
+        if(r.days<=H) return r.vn/r.p*tail(H-r.days);
+        return (r.vn/Math.pow(1+r.tea+shift/100,(r.days-H)/365))/r.p;
+      }
+      if(r.days<=H) return (100*cerOn(r.days-CL,m)/r.emi)/r.p*tail(H-r.days);
+      return (100*cerOn(H-CL,m)/r.emi/Math.pow(1+r.tir+shift/100,(r.days-H)/365))/r.p;
+    }
+    function field(id,l,v,st){
+      return '<label class="fld" for="'+id+'"><span>'+l+'</span><input id="'+id+'" type="number" inputmode="decimal" step="'+st+'" value="'+v+'"></label>';
+    }
+    function ret(v){return '<span class="'+(v<0?'down':'')+'">'+pc(v,1)+'</span>';}
+
+    $('p-rank').innerHTML=
+      '<div class="card"><h2>Mejor opción según el plazo</h2>'+
+      '<p class="sub">Qué instrumento rinde más en pesos si invertís hoy y medís el resultado a 1, 2, 3 o 6 meses. Cambiá los supuestos y todo se recalcula.</p>'+
+      '<div class="ctl">'+
+        field('a-infl','Inflación mensual esperada (%)',A.inflMensual,0.1)+
+        field('a-reinv','Reinversión de lo que vence (TNA %)',A.reinvTna,0.5)+
+        field('a-shift','Cambio de tasa al cierre (pp)',0,0.5)+
+      '</div>'+
+      '<div class="strip" id="rank-best"></div>'+
+      '<div class="scroll" id="rank-top"></div>'+
+      '<p class="note">Los instrumentos que vencen antes del plazo se cobran y lo cobrado se reinvierte a la tasa indicada. Los que vencen después se venden al cierre del plazo a una tasa igual a la de hoy más el cambio que elijas. La fila "Vence antes" muestra la mejor opción que se cobra dentro del plazo, así que no depende del precio de venta. La última columna repite el cálculo con la tasa 3 pp más alta, para ver cuánto pierde cada opción si el mercado se pone en contra.</p></div>'+
+      '<div class="card"><h2>Rendimiento de cada instrumento por plazo</h2>'+
+      '<p class="sub">Ganancia en pesos sobre lo invertido. El recuadro marca el mejor de cada columna.</p>'+
+      '<div class="scroll" id="rank-mx"></div>'+
+      '<p class="note">Supuestos de base: inflación mensual '+nf(A.inflMensual,1)+'% ('+A.inflFuente+'); CER conocido hasta el '+fd(ts(D.cer.refDate))+'; reinversión a la BADLAR. No incluye comisiones ni diferencia entre compra y venta, que pueden cambiar el orden en plazos cortos. Las TAMAR y el dual no se comparan porque su pago depende de la TAMAR futura. † Valor al vencimiento estimado. Es una comparación informativa con supuestos propios, no una recomendación personalizada de inversión.</p></div>';
+
+    function render(){
+      var num=function(id){var v=parseFloat($(id).value);return isNaN(v)?0:v;};
+      var m=num('a-infl'), rv=num('a-reinv'), sh=num('a-shift');
+      var res=HZ.map(function(h){
+        var list=pool.map(function(r){
+          return {r:r,R:value(r,h.d,sh,m,rv)-1,Rs:value(r,h.d,sh+3,m,rv)-1};
+        }).sort(function(a,b){return b.R-a.R;});
+        return {h:h,list:list};
+      });
+
+      $('rank-best').innerHTML=res.map(function(x){
+        var t=x.list[0];
+        return '<div class="read"><span>Mejor a '+x.h.l+'</span><strong>'+t.r.t+' · '+pc(t.R,1)+'</strong><small>Equivale a '+pc(t.R*365/x.h.d,1)+' TNA · '+(t.r.days<=x.h.d?'vence el '+fd(t.r.vto):'se vende al cierre')+'</small></div>';
+      }).join('');
+
+      var body='';
+      res.forEach(function(x){
+        var rows=x.list.slice(0,3).map(function(e,i){return {e:e,lab:String(i+1)};});
+        var safe=x.list.filter(function(e){return e.r.days<=x.h.d;})[0];
+        if(safe) rows.push({e:safe,lab:'Vence antes'});
+        rows.forEach(function(row,i){
+          var e=row.e, r=e.r, mat=r.days<=x.h.d;
+          body+='<tr'+(i===0?' class="first"':'')+'>'+
+            (i===0?'<td class="hz" rowspan="'+rows.length+'">'+x.h.l+'</td>':'')+
+            '<td class="'+(i===3?'k':'')+'">'+row.lab+'</td>'+
+            '<td class="'+(i===0?'hi':'')+'" style="font-family:var(--f-display)">'+r.t+(r.est?'†':'')+'</td>'+
+            '<td class="k">'+r.tipo+'</td>'+
+            '<td class="k">'+(mat?'Cobra el '+fd(r.vto)+' y reinvierte':'Se vende al cierre')+'</td>'+
+            '<td class="'+(i===0?'hi':'')+'">'+ret(e.R)+'</td>'+
+            '<td>'+pc(e.R*365/x.h.d,1)+'</td>'+
+            '<td>'+pc(Math.pow(1+e.R,30/x.h.d)-1,2)+'</td>'+
+            '<td>'+ret(e.Rs)+'</td></tr>';
+        });
+      });
+      $('rank-top').innerHTML='<table><thead><tr><th>Plazo</th><th>#</th><th>Especie</th><th>Tipo</th><th>Cómo termina</th><th>Rinde</th><th>Equiv. TNA</th><th>Equiv. TEM</th><th>Si la tasa sube 3 pp</th></tr></thead><tbody>'+body+'</tbody></table>';
+
+      var mx=pool.slice().sort(function(a,b){return a.days-b.days;});
+      var cols=HZ.map(function(h){
+        var v=mx.map(function(r){return value(r,h.d,sh,m,rv)-1;});
+        return {v:v,max:Math.max.apply(null,v),min:Math.min.apply(null,v)};
+      });
+      var mb='';
+      mx.forEach(function(r,ri){
+        mb+='<tr><td>'+r.t+(r.est?'†':'')+'</td><td class="k">'+r.tipo+'</td><td>'+fd(r.vto)+'</td>';
+        cols.forEach(function(c){
+          var R=c.v[ri], w=Math.round((R-c.min)/((c.max-c.min)||1)*38);
+          mb+='<td class="'+(R===c.max?'best':'')+'" style="background:color-mix(in srgb,var(--accent) '+w+'%,transparent)">'+ret(R)+'</td>';
+        });
+        mb+='</tr>';
+      });
+      $('rank-mx').innerHTML='<table><thead><tr><th>Especie</th><th>Tipo</th><th>Vence</th>'+HZ.map(function(h){return '<th>'+h.l+'</th>';}).join('')+'</tr></thead><tbody>'+mb+'</tbody></table>';
+    }
+    ['a-infl','a-reinv','a-shift'].forEach(function(id){$(id).addEventListener('input',render);});
+    render();
+  }
+
+  function init(D){
+    var settle=ts(D.settle);
+    var ins = D.instruments || [];
+    (function(){var s=D.sources||[],e=document.getElementById('src');if(!e||!s.length)return;
+      e.innerHTML='Fuentes: '+s.map(function(x){return '<a href="'+x.u+'" target="_blank" rel="noopener">'+x.n+'</a> ('+x.uso+')';}).join('; ')+'. CER de emisión de los bonos cero cupón = CER del BCRA a 14 días corridos antes de la fecha de emisión (la que informan las resoluciones de Finanzas); con ese método se reproduce el valor publicado de TZXS7.';})();
+    fixedMeta = ins.filter(function(m){return m.fam==='fixed' && m.vn;});
+    cerMeta = ins.filter(function(m){return m.fam==='cer';});
+    varMeta = ins.filter(function(m){return m.fam==='var';});
+    var days=function(v){return Math.round((ts(v)-settle)/DAY);};
+    var live=function(m){return D.prices[m.t] && days(m.vto)>0;};
+    // CER: los bonos ajustan por el índice de 10 días hábiles antes (aprox. 14 días corridos).
+    var kd = Math.round((ts(D.cer.refDate)-settle)/DAY), CL = 14;
+    function cerOn(t,m){
+      if(t<=kd) return D.cer.refValue/Math.pow(1+D.cer.dailyRate, kd-t);
+      return D.cer.refValue*Math.pow(Math.pow(1+m/100,1/30), t-kd);
+    }
+    var cerS = cerOn(-CL, 0);
+
+    // Tasa fija
+    var fixed = fixedMeta.filter(live).map(function(m){
+      var q=D.prices[m.t], d=days(m.vto), ret=m.vn/q.p-1;
+      return {t:m.t,kind:m.kind,vto:ts(m.vto),days:d,vn:m.vn,est:m.est,p:q.p,chg:q.chg,ret:ret,
+        tna:ret*365/d, tea:Math.pow(1+ret,365/d)-1, tem:Math.pow(1+ret,30/d)-1};
+    });
+    var fcurve=polyfit(fixed.map(function(r){return r.days;}),fixed.map(function(r){return r.tem;}),fixed.length>=6?2:1);
+    fixed.forEach(function(r){r.vs=r.tem-fcurve(r.days);});
+    var maxTem=Math.max.apply(null,fixed.map(function(r){return r.tem;}));
+    var best=fixed.reduce(function(a,b){return b.tea>a.tea?b:a;});
+    var fcols=[
+      {k:'t',l:'Especie',f:function(r){return r.t;}},
+      {k:'kind',l:'Tipo',cls:'k',f:function(r){return r.kind;}},
+      {k:'vto',l:'Vence',f:function(r){return fd(r.vto);}},
+      {k:'days',l:'Días',f:function(r){return r.days;}},
+      {k:'vn',l:'VN al vto.',f:function(r){return nf(r.vn,2)+(r.est?'†':'');}},
+      {k:'p',l:'Precio',f:function(r){return nf(r.p,3);}},
+      {k:'chg',l:'Var. día',f:function(r){return chg(r.chg);}},
+      {k:'ret',l:'Rend. período',f:function(r){return pc(r.ret);}},
+      {k:'tna',l:'TNA',f:function(r){return pc(r.tna,1);}},
+      {k:'tea',l:'TEA',f:function(r){return pc(r.tea,1);}},
+      {k:'tem',l:'TEM',f:function(r){return '<span class="bar" style="width:'+Math.round(r.tem/maxTem*44)+'px"></span>'+pc(r.tem);}},
+      {k:'vs',l:'Vs. curva',f:function(r){return vsf(r.vs);}}
+    ];
+    var pf=document.getElementById('p-fija');
+    pf.innerHTML='<div class="card"><h2>TEM según plazo</h2><p class="sub">Cuánto rinde por mes cada letra (círculo) y bono capitalizable (cuadrado). Lo que queda sobre la curva rinde más que el promedio para su plazo; lo que queda debajo, menos.</p>'+
+      '<div class="legend"><span><i class="ci"></i>LECAP</span><span><i class="sq"></i>BONCAP</span><span><i class="ln"></i>Curva ajustada</span></div><div id="ch-fija"></div></div>'+
+      '<div class="card"><h2>Letras y bonos capitalizables</h2><div class="scroll" id="tb-fija"></div>'+
+      '<p class="note">† Valor al vencimiento estimado a partir de la TIR publicada por BYMA; confirmar con el prospecto de emisión.</p></div>';
+    scatter(document.getElementById('ch-fija'), fixed.map(function(r){return {x:r.days,y:r.tem,t:r.t,sq:r.kind==='BONCAP'};}),
+      {f:fcurve,fy:function(v){return pc(v,1);},yl:'TEM',aria:'TEM de LECAP y BONCAP según plazo, con su curva ajustada'});
+    sortable(document.getElementById('tb-fija'),fcols,fixed,'days',1);
+
+    // CER
+    var cer = cerMeta.filter(live).map(function(m){
+      var q=D.prices[m.t], d=days(m.vto), coef=m.emi?cerS/m.emi:null, par=coef?q.p/(100*coef):null;
+      var tir= coef? Math.pow(100*coef/q.p,365/d)-1 : null;
+      return {t:m.t,vto:ts(m.vto),days:d,p:q.p,chg:q.chg,emi:m.emi,coef:coef,par:par,tir:tir};
+    });
+    var cerPts=cer.filter(function(r){return r.tir!=null;});
+    var ccurve=cerPts.length>=3?polyfit(cerPts.map(function(r){return r.days;}),cerPts.map(function(r){return r.tir;}),cerPts.length>=6?2:1):null;
+    cer.forEach(function(r){r.vs=(r.tir!=null&&ccurve)?r.tir-ccurve(r.days):null;});
+    var maxTir=Math.max.apply(null,cer.filter(function(r){return r.tir!=null;}).map(function(r){return r.tir;}));
+    var bestCer=cer.filter(function(r){return r.tir!=null;}).reduce(function(a,b){return b.tir>a.tir?b:a;});
+    var ccols=[
+      {k:'t',l:'Especie',f:function(r){return r.t;}},
+      {k:'vto',l:'Vence',f:function(r){return fd(r.vto);}},
+      {k:'days',l:'Días',f:function(r){return r.days;}},
+      {k:'p',l:'Precio',f:function(r){return nf(r.p,2);}},
+      {k:'chg',l:'Var. día',f:function(r){return chg(r.chg);}},
+      {k:'coef',l:'Coef. CER',f:function(r){return nf(r.coef,4);}},
+      {k:'par',l:'Paridad',f:function(r){return pc(r.par,1);}},
+      {k:'tir',l:'TIR real',f:function(r){return r.tir==null?'—':'<span class="bar cer" style="width:'+Math.max(0,Math.round(r.tir/maxTir*44))+'px"></span>'+pc(r.tir,1);}},
+      {k:'vs',l:'Vs. curva',f:function(r){return vsf(r.vs);}}
+    ];
+    var pcer=document.getElementById('p-cer');
+    pcer.innerHTML='<div class="card"><h2>TIR real según plazo</h2><p class="sub">Rendimiento por encima de la inflación (CER) si se mantiene el bono hasta el vencimiento, sin proyectar inflación futura. Sobre la curva rinde más que el promedio para su plazo; debajo, menos.</p>'+
+      '<div class="legend"><span><i class="ci cer"></i>Cero cupón CER</span><span><i class="ln"></i>Curva ajustada</span></div><div id="ch-cer"></div></div>'+
+      '<div class="card"><h2>Bonos y letras ajustables por CER</h2><div class="scroll" id="tb-cer"></div>'+
+      '<p class="note">CER de cálculo (10 días hábiles antes de la liquidación): '+nf(cerS,4)+', estimado día a día con el último dato del BCRA, que llega al '+fd(ts(D.cer.refDate))+'. Las filas con — todavía no tienen cargado su CER de emisión, así que muestran precio sin TIR. La TIR de bonos con cupón (TX26, TX28, TX31) no se calcula acá.</p></div>';
+    scatter(document.getElementById('ch-cer'), cer.filter(function(r){return r.tir!=null;}).map(function(r){return {x:r.days,y:r.tir,t:r.t,cer:true};}),
+      {f:ccurve,fy:function(v){return pc(v,0);},yl:'TIR real anual',aria:'TIR real de bonos CER según plazo, con su curva ajustada'});
+    sortable(document.getElementById('tb-cer'),ccols,cer,'days',1);
+
+    // TAMAR / dual
+    var vr = varMeta.filter(live).map(function(m){var q=D.prices[m.t];return {t:m.t,kind:m.kind,vto:ts(m.vto),days:days(m.vto),p:q.p,chg:q.chg};});
+    var vcols=[
+      {k:'t',l:'Especie',f:function(r){return r.t;}},
+      {k:'kind',l:'Tipo',cls:'k',f:function(r){return r.kind;}},
+      {k:'vto',l:'Vence',f:function(r){return fd(r.vto);}},
+      {k:'days',l:'Días',f:function(r){return r.days;}},
+      {k:'p',l:'Precio',f:function(r){return nf(r.p,3);}},
+      {k:'chg',l:'Var. día',f:function(r){return chg(r.chg);}}
+    ];
+    document.getElementById('p-tamar').innerHTML='<div class="card"><h2>Bonos TAMAR y dual</h2><div class="scroll" id="tb-var"></div>'+
+      '<p class="note">Su pago depende de la TAMAR futura, así que no hay un rendimiento único para calcular. Se muestra el precio por cada VN 100 y su variación diaria.</p></div>';
+    sortable(document.getElementById('tb-var'),vcols,vr,'days',1);
+
+    buildRank(D, fixed, cer, cerOn, CL);
+
+    // Cabecera
+    document.getElementById('stamp').innerHTML='Cierre <b>'+fd(ts(D.asOf))+'</b> · liquidación T+1 <b>'+fd(settle)+'</b>';
+    document.getElementById('strip').innerHTML=
+      '<div class="read"><span>BADLAR bancos privados</span><strong>'+nf(D.badlar.tna,1)+'% TNA</strong><small>al '+fd(ts(D.badlar.fecha))+', referencia para comparar plazo fijo</small></div>'+
+      '<div class="read"><span>Mayor TEA a tasa fija</span><strong>'+pc(best.tea,1)+'</strong><small>'+best.t+', vence '+fd(best.vto)+'</small></div>'+
+      '<div class="read"><span>Mayor TIR real en CER</span><strong>'+pc(bestCer.tir,1)+'</strong><small>'+bestCer.t+', vence '+fd(bestCer.vto)+'</small></div>';
+  }
+
+  // Pestañas
+  var tabs=[['tab-fija','p-fija'],['tab-cer','p-cer'],['tab-tamar','p-tamar'],['tab-rank','p-rank']];
+  tabs.forEach(function(pair){
+    document.getElementById(pair[0]).addEventListener('click',function(){
+      tabs.forEach(function(q){
+        var on=q[0]===pair[0];
+        document.getElementById(q[0]).setAttribute('aria-selected',on);
+        document.getElementById(q[1]).hidden=!on;
+      });
+    });
+  });
+
+  fetch('data.json',{cache:'no-cache'}).then(function(r){if(!r.ok) throw new Error(r.status);return r.json();}).then(init).catch(function(e){
+    document.getElementById('stamp').textContent='';
+    document.getElementById('p-fija').innerHTML='<div class="err">No se pudieron cargar los datos ('+e.message+'). Reintentá en unos minutos.</div>';
+  });
+})();
+</script>
+
+</body></html>
