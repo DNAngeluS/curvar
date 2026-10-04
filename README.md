@@ -47,3 +47,7 @@ Para probar offline: `FIXTURE_DIR=<carpeta con notes.json, bonds.json, cer.json,
 ## Fuentes
 
 Precios: [data912](https://data912.com) (panel BYMA). CER y BADLAR: [API de Estadísticas del BCRA](https://www.bcra.gob.ar/en/central-bank-api-catalog/). Vencimientos y fechas de emisión: Secretaría de Finanzas. Inflación esperada: REM del BCRA. La lista completa con su uso está en `data.json` (`sources`) y se muestra al pie de la página.
+
+## Licencia
+
+[MIT](LICENSE). Los datos de mercado pertenecen a sus fuentes (BYMA vía data912, BCRA, Secretaría de Finanzas).

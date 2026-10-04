@@ -2,6 +2,7 @@
   "name": "curva-en-pesos",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Curva de rendimientos de instrumentos en pesos (LECAP, BONCAP, CER, TAMAR, duales) publicada en GitHub Pages.",
   "scripts": {
