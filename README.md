@@ -11,7 +11,7 @@ Página: https://dnangelus.ar/curvar/
 ```
 GitHub Actions (lun a vie, 18:30 Buenos Aires)
   └─ scripts/update.mjs ── data912 (precios) + API del BCRA (CER, BADLAR)
-       └─ data.json  ──►  commit  ──►  GitHub Pages (index.html + data.json)
+       └─ data.json  ──►  PR automático  ──►  GitHub Pages (index.html + data.json)
 ```
 
 - `index.html` es una página estática sin build. Al abrirse lee `data.json` y calcula TIR, TNA, TEA y TEM en el navegador.
@@ -46,7 +46,7 @@ El tablero económico y lo cosmético (estética, donaciones) van en carriles se
 
 1. En GitHub: **Settings → Pages → Source: GitHub Actions**.
 2. En **Actions**, correr "Actualizar datos y publicar" a mano con `dry_run` para validar las fuentes desde un runner de GitHub, y después una vez sin `dry_run` (con `force` si es fuera de horario).
-3. No hacen falta secretos: data912 y la API del BCRA no piden clave, y el commit diario usa el `GITHUB_TOKEN` automático del workflow.
+3. No hacen falta secretos: data912 y la API del BCRA no piden clave, y la actualización diaria usa el `GITHUB_TOKEN` automático del workflow (publica `data.json` por PR; ver `docs/WORKFLOW.md`).
 
 ## Fuentes
 

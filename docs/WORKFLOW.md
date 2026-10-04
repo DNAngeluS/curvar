@@ -15,7 +15,7 @@ Si un cambio estético necesita tocar `index.html` (por ejemplo, reordenar el en
 
 ## Reglas
 
-1. **`main` es lo publicado.** Cada commit a `main` se despliega. Nada se pushea directo salvo `data.json` por el bot de Actions o a mano (RUNBOOK, "Si falló una fuente", punto 6).
+1. **`main` es lo publicado.** Cada commit a `main` se despliega. Con `main-con-pr.json` activo nada se pushea directo: el bot de Actions publica `data.json` por PR (rama `data/auto`) y lo mergea solo; a mano, también por PR (RUNBOOK, "Si falló una fuente", punto 6).
 2. **Todo cambio entra por PR**, de a un carril por PR. La guarda de CI (`scripts/check-lanes.mjs`) rechaza una rama `site/…` que toque archivos del tablero.
 3. **CI debe estar en verde**: `npm test` (script, forma de `data.json`, carriles) y el armado del sitio.
 4. **Antes de pedir el merge**, quien cambia el tablero corre la prueba de humo en navegador (`npm run smoke`) y compara contra comparatasas.ar según el RUNBOOK. El PR resume qué cambió y qué evidencia hay.
@@ -72,6 +72,6 @@ En `.github/rulesets/` hay dos reglas listas para importar en **Settings → Rul
 | Archivo | Qué hace | Cuándo |
 |---|---|---|
 | `main-basico.json` | Impide borrar `main` y el force-push. No afecta al bot diario. | Ya. |
-| `main-con-pr.json` | Exige PR y el check `tablero` de CI; el rol admin puede saltearlo. | Solo después de resolver el bot (abajo). |
+| `main-con-pr.json` | Exige PR y el check `tablero` de CI; el rol admin puede saltearlo. | Después de mergear el PR que cambia `update.yml` y de comprobar una corrida manual en verde (abajo). |
 
-**Por qué no va todo junto:** `update.yml` hace `git push` a `main` con el `GITHUB_TOKEN` de Actions, que no se puede poner como excepción de un ruleset. Con `main-con-pr.json` activo, la actualización diaria fallaría. Hay dos salidas: (a) que el job use un token de un administrador (secreto con un PAT de alcance mínimo en este repo) o una GitHub App con bypass, o (b) que el bot publique `data.json` por PR con auto-merge. Cualquiera es un cambio a `update.yml`, por PR.
+**Cómo publica el bot con `main-con-pr.json` activo:** `update.yml` sube `data.json` a la rama `data/auto`, abre un PR y mergea con squash. Los PR creados con `GITHUB_TOKEN` no disparan `ci.yml`, así que el job reporta él mismo el estado `tablero` en verde, después de correr los tests y de que el script validó los datos. Requisitos en **Settings → Actions → General**: *Workflow permissions* en lectura y escritura, y tildado *Allow GitHub Actions to create and approve pull requests*. Si una actualización queda sin mergear, el PR `data/auto` queda abierto y la siguiente corrida lo reutiliza.

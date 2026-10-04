@@ -22,6 +22,8 @@ on:
 permissions:
   contents: write
   issues: write
+  pull-requests: write
+  statuses: write
   pages: write
   id-token: write
 
@@ -51,14 +53,24 @@ jobs:
           FORCE: ${{ inputs.force }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: node scripts/update.mjs
-      - name: Commit de data.json
+      # main está protegido (PR + check "tablero"): el bot publica data.json por PR y lo mergea solo.
+      # Los PR creados con GITHUB_TOKEN no disparan ci.yml, así que el estado "tablero" lo reporta este job
+      # después de correr los tests y validar la actualización.
+      - name: Publicar data.json por PR
         if: steps.update.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          title="data: actualización ${GITHUB_RUN_ID} ($(date -u +%F))"
+          git switch -c data/auto
           git add data.json
-          git commit -m "data: actualización ${GITHUB_RUN_ID} ($(date -u +%F))"
-          git push
+          git commit -m "$title"
+          git push --force origin data/auto
+          gh pr create --base main --head data/auto --title "$title" --body "Actualización automática de data.json (corrida ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})." || true
+          gh api "repos/${GITHUB_REPOSITORY}/statuses/$(git rev-parse HEAD)" -f state=success -f context=tablero -f description="Tests y validación del script en update.yml"
+          gh pr merge data/auto --squash --delete-branch --subject "$title"
       - name: Abrir issue si requiere revisión
         if: steps.update.outputs.needs_review == 'true' && inputs.dry_run != true
         env:
