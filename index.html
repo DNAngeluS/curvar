@@ -113,10 +113,9 @@ th[title] button,th[title]{cursor:help}
     <p>Los PR también cotizan.</p>
   </section>
   <footer>
-    <div><strong>Fuentes.</strong> Precios: data912 (panel BYMA, cierre del día hábil anterior, con demora de hasta 2 horas). CER y BADLAR: <a href="https://www.bcra.gob.ar/en/central-bank-api-catalog/" target="_blank" rel="noopener">API del BCRA</a>. Valores al vencimiento: resumen de negociación IAMC del 26/05/2026 y ficha de la S29E7 en Boston Asset Management.</div>
     <div id="src"></div>
-    <div><strong>Metodología.</strong> Cálculo de tasa fija: rendimiento = VN al vencimiento ÷ precio − 1 sobre los días hasta el vencimiento desde la liquidación (T+1). TNA con base 365, TEA compuesta anual, TEM compuesta a 30 días.</div>
-    <div><strong>Disclaimer.</strong> Material informativo. No constituye asesoramiento ni recomendación de inversión.</div>
+    <div><strong>Metodología.</strong> Cálculo de tasa fija: rendimiento = VN al vencimiento ÷ precio − 1 sobre los días hasta el vencimiento desde la liquidación (T+1). TNA con base 365, TEA compuesta anual, TEM compuesta a 30 días. CER de emisión de los bonos cero cupón = CER del BCRA a 14 días corridos antes de la fecha de emisión (la que informan las resoluciones de Finanzas).</div>
+    <div><strong>Aviso legal.</strong> Curv.ar es una herramienta informativa y educativa. No es asesoramiento financiero, legal ni impositivo, ni una oferta, recomendación o solicitud de compra o venta de valores, y su autor no es un agente registrado ante la CNV. Los datos provienen de terceros y se ofrecen «tal cual están» y «según disponibilidad»: pueden tener demoras, errores u omisiones, y los cálculos son estimaciones bajo supuestos. El rendimiento pasado no garantiza resultados futuros e invertir implica riesgo, incluso de pérdida de capital. Quien use el sitio decide bajo su exclusiva responsabilidad; en la máxima medida permitida por la ley, el autor no responde por pérdidas o daños derivados de su uso. Antes de invertir, consultá a un profesional matriculado.</div>
     <div><a href="https://github.com/DNAngeluS/curvar" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/DNAngeluS/curvar/issues/new?template=data.yml" target="_blank" rel="noopener">Reportar un dato</a> · <a href="https://github.com/DNAngeluS/curvar/issues/new?template=feature.yml" target="_blank" rel="noopener">Pedir una mejora</a> · <a href="https://cafecito.app/dnangelus" target="_blank" rel="noopener">Cafecito</a></div>
     <div id="extras"></div>
   </footer>
@@ -311,8 +310,10 @@ th[title] button,th[title]{cursor:help}
   function init(D){
     var settle=ts(D.settle);
     var ins = D.instruments || [];
-    (function(){var s=D.sources||[],e=document.getElementById('src');if(!e||!s.length)return;
-      e.innerHTML='Fuentes: '+s.map(function(x){return '<a href="'+x.u+'" target="_blank" rel="noopener">'+x.n+'</a> ('+x.uso+')';}).join('; ')+'. CER de emisión de los bonos cero cupón = CER del BCRA a 14 días corridos antes de la fecha de emisión (la que informan las resoluciones de Finanzas); con ese método se reproduce el valor publicado de TZXS7.';})();
+    (function(){var e=document.getElementById('src');if(!e)return;
+      var s=(D.sources||[]).filter(function(x){try{return /\.gob\.ar$/.test(new URL(x.u).hostname);}catch(_){return false;}});
+      if(!s.length)return;
+      e.innerHTML='<strong>Fuentes oficiales.</strong> '+s.map(function(x){return '<a href="'+x.u+'" target="_blank" rel="noopener">'+x.n+'</a> ('+x.uso+')';}).join('; ')+'.';})();
     fixedMeta = ins.filter(function(m){return m.fam==='fixed' && m.vn;});
     cerMeta = ins.filter(function(m){return m.fam==='cer';});
     varMeta = ins.filter(function(m){return m.fam==='var';});
