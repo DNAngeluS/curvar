@@ -4,9 +4,19 @@
   try {
     var host = document.getElementById('extras');
     if (!host) return;
+    var css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'extras/extras.css';
+    document.head.appendChild(css);
     var cafe = document.createElement('div');
-    cafe.className = 'cafe';
-    cafe.innerHTML = "<a href='https://cafecito.app/dnangelus' rel='noopener' target='_blank'><img srcset='https://cdn.cafecito.app/imgs/buttons/button_4.png 1x, https://cdn.cafecito.app/imgs/buttons/button_4_2x.png 2x, https://cdn.cafecito.app/imgs/buttons/button_4_3.75x.png 3.75x' src='https://cdn.cafecito.app/imgs/buttons/button_4.png' alt='Invitame un caf\u00e9 en cafecito.app' /></a>";
+    cafe.className = 'x-cafe';
+    cafe.innerHTML = '<strong>¿Te ahorró un Excel?</strong>' +
+      '<p>Si Curv.ar te sirve, podés bancar el proyecto con un café.</p>' +
+      '<a href="https://cafecito.app/dnangelus" target="_blank" rel="noopener">☕ Invitame uno →</a>';
+    var egg = document.createElement('p');
+    egg.className = 'x-egg';
+    egg.textContent = 'El rendimiento pasado no garantiza cafés futuros.';
     host.appendChild(cafe);
+    host.appendChild(egg);
   } catch (e) { /* los extras son opcionales */ }
 })();

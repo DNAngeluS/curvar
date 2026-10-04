@@ -1,0 +1,16 @@
+name: Quiero pedir algo
+description: Una métrica, un gráfico, una familia de instrumentos o una mejor forma de mirar los datos.
+title: "Pedido: "
+labels: ["feature"]
+body:
+  - type: textarea
+    id: pedido
+    attributes:
+      label: ¿Qué te gustaría ver?
+    validations:
+      required: true
+  - type: textarea
+    id: uso
+    attributes:
+      label: ¿Para qué lo usarías?
+      description: Ayuda a decidir dónde encaja y cómo mostrarlo.

@@ -1,4 +1,9 @@
 /* Carril "site": estética y extras. Solo puede usar clases propias (prefijo x-) o #extras.
    El tablero no depende de este archivo; si falta o falla, la página funciona igual. */
-#extras .cafe{margin-top:6px}
-#extras .cafe img{display:block;height:auto;max-width:100%}
+#extras .x-cafe{margin-top:8px;padding:12px 14px;background:var(--surface,#fff);border:1px solid var(--line,#D3DCE4);border-radius:6px;display:flex;flex-direction:column;gap:2px}
+#extras .x-cafe strong{color:var(--ink,#0D1A2B);font-size:.95rem;font-weight:600}
+#extras .x-cafe p{margin:0}
+#extras .x-cafe a{align-self:flex-start;margin-top:6px;color:var(--accent,#0B6E8C);font-weight:600;text-decoration:none}
+#extras .x-cafe a:hover{text-decoration:underline}
+#extras .x-cafe a:focus-visible{outline:2px solid var(--accent,#0B6E8C);outline-offset:2px}
+#extras .x-egg{margin:8px 0 0;font-style:italic}

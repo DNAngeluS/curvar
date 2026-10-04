@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset=utf8><title>Curva en Pesos</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="es"><head><meta charset=utf8><title>Curv.ar — Bonos y letras argentinas</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="Bonos, letras y tasas argentinas para comparar rendimientos sin abrir cinco planillas."><meta property="og:title" content="Curv.ar"><meta property="og:description" content="La curva en pesos, sin vueltas. Bonos, letras y tasas argentinas en un solo lugar."><meta property="og:type" content="website"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -74,29 +74,49 @@ td.hz{font-family:var(--f-display);font-weight:800;font-size:1rem;vertical-align
 tr.first td{border-top:2px solid var(--line)}
 td.best{font-weight:600;outline:1px solid var(--accent);outline-offset:-2px}
 footer{font-size:.78rem;color:var(--muted);display:flex;flex-direction:column;gap:6px}
-footer a{color:var(--accent)}
+footer a,.cta a,.hlinks a,.ask a,.err a{color:var(--accent)}
+footer a:focus-visible,.cta a:focus-visible,.hlinks a:focus-visible,.ask a:focus-visible,.err a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+footer strong{color:var(--ink);font-weight:600}
+.tag{margin:4px 0 0;font-size:.82rem;color:var(--muted)}
+.hlinks{margin-top:2px;font-size:.78rem}
+.cta{margin:-8px 0 0;font-size:.8rem;color:var(--muted)}
+.ask p{margin:0 0 4px;color:var(--muted);font-size:.84rem}
+.ask p:last-child{margin:6px 0 0;font-size:.8rem}
+.err small{display:block;margin-top:4px;opacity:.85}
+th[title] button,th[title]{cursor:help}
 </style>
 
 <div class="wrap">
   <header>
-    <h1>Curva en Pesos</h1>
-    <div class="stamp" id="stamp">Cargando datos…</div>
+    <div>
+      <h1>Curv.ar</h1>
+      <p class="tag">La curva en pesos, sin vueltas.</p>
+    </div>
+    <div class="stamp"><div id="stamp">Cargando datos…</div><div class="hlinks"><a href="https://github.com/DNAngeluS/curvar" target="_blank" rel="noopener">GitHub</a></div></div>
   </header>
   <section class="strip" id="strip" aria-label="Lecturas clave"></section>
   <div role="tablist" class="tabs" aria-label="Familia de instrumentos">
     <button role="tab" id="tab-fija" aria-selected="true" aria-controls="p-fija">Tasa fija</button>
     <button role="tab" id="tab-cer" aria-selected="false" aria-controls="p-cer">CER</button>
     <button role="tab" id="tab-tamar" aria-selected="false" aria-controls="p-tamar">TAMAR y dual</button>
-    <button role="tab" id="tab-rank" aria-selected="false" aria-controls="p-rank">Mejor por plazo</button>
+    <button role="tab" id="tab-rank" aria-selected="false" aria-controls="p-rank">Mejor por plazo · beta</button>
   </div>
+  <p class="cta">¿Falta algo o encontraste un número raro? <a href="https://github.com/DNAngeluS/curvar/issues/new" target="_blank" rel="noopener">Abrí un issue →</a></p>
   <section class="panel" id="p-fija" role="tabpanel" aria-labelledby="tab-fija"></section>
   <section class="panel" id="p-cer" role="tabpanel" aria-labelledby="tab-cer" hidden></section>
   <section class="panel" id="p-tamar" role="tabpanel" aria-labelledby="tab-tamar" hidden></section>
   <section class="panel" id="p-rank" role="tabpanel" aria-labelledby="tab-rank" hidden></section>
+  <section class="card ask" aria-label="Pedidos y reportes">
+    <h2>¿Qué le falta a Curv.ar?</h2>
+    <p>¿Una especie, una métrica o una forma mejor de mirar los datos?</p>
+    <p><a href="https://github.com/DNAngeluS/curvar/issues/new" target="_blank" rel="noopener">Pedilo en GitHub →</a></p>
+    <p>Los PR también cotizan.</p>
+  </section>
   <footer>
-    <div>Precios: data912 (panel BYMA, cierre del día hábil anterior, con demora de hasta 2 horas). CER y BADLAR: <a href="https://www.bcra.gob.ar/en/central-bank-api-catalog/" target="_blank" rel="noopener">API del BCRA</a>. Valores al vencimiento: resumen de negociación IAMC del 26/05/2026 y ficha de la S29E7 en Boston Asset Management.</div>
     <div id="src"></div>
-    <div>Cálculo de tasa fija: rendimiento = VN al vencimiento ÷ precio − 1 sobre los días hasta el vencimiento desde la liquidación (T+1). TNA con base 365, TEA compuesta anual, TEM compuesta a 30 días. Material informativo, no es una recomendación de inversión.</div>
+    <div><strong>Metodología.</strong> Cálculo de tasa fija: rendimiento = VN al vencimiento ÷ precio − 1 sobre los días hasta el vencimiento desde la liquidación (T+1). TNA con base 365, TEA compuesta anual, TEM compuesta a 30 días. CER de emisión de los bonos cero cupón = CER del BCRA a 14 días corridos antes de la fecha de emisión (la que informan las resoluciones de Finanzas).</div>
+    <div><strong>Aviso legal.</strong> Curv.ar es una herramienta informativa y educativa. No es asesoramiento financiero, legal ni impositivo, ni una oferta, recomendación o solicitud de compra o venta de valores, y su autor no es un agente registrado ante la CNV. Los datos provienen de terceros y se ofrecen «tal cual están» y «según disponibilidad»: pueden tener demoras, errores u omisiones, y los cálculos son estimaciones bajo supuestos. El rendimiento pasado no garantiza resultados futuros e invertir implica riesgo, incluso de pérdida de capital. Quien use el sitio decide bajo su exclusiva responsabilidad; en la máxima medida permitida por la ley, el autor no responde por pérdidas o daños derivados de su uso. Antes de invertir, consultá a un profesional matriculado.</div>
+    <div><a href="https://github.com/DNAngeluS/curvar" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/DNAngeluS/curvar/issues/new?template=data.yml" target="_blank" rel="noopener">Reportar un dato</a> · <a href="https://github.com/DNAngeluS/curvar/issues/new?template=feature.yml" target="_blank" rel="noopener">Pedir una mejora</a> · <a href="https://cafecito.app/dnangelus" target="_blank" rel="noopener">Cafecito</a></div>
     <div id="extras"></div>
   </footer>
 </div>
@@ -119,7 +139,7 @@ footer a{color:var(--accent)}
       return (x>y?1:x<y?-1:0)*s.dir;
     });
     var h='<table><thead><tr>'+cols.map(function(c){
-      return '<th><button type="button" data-k="'+c.k+'"'+(s.k===c.k?' data-dir="'+s.dir+'"':'')+'>'+c.l+'</button></th>';
+      return '<th'+(c.tip?' title="'+c.tip+'"':'')+'><button type="button" data-k="'+c.k+'"'+(s.k===c.k?' data-dir="'+s.dir+'"':'')+'>'+c.l+'</button></th>';
     }).join('')+'</tr></thead><tbody>'+sorted.map(function(r){
       return '<tr>'+cols.map(function(c){return '<td class="'+(c.cls||'')+'">'+c.f(r)+'</td>';}).join('')+'</tr>';
     }).join('')+'</tbody></table>';
@@ -217,7 +237,7 @@ footer a{color:var(--accent)}
 
     $('p-rank').innerHTML=
       '<div class="card"><h2>Mejor opción según el plazo</h2>'+
-      '<p class="sub">Qué instrumento rinde más en pesos si invertís hoy y medís el resultado a 1, 2, 3 o 6 meses. Cambiá los supuestos y todo se recalcula.</p>'+
+      '<p class="sub">Qué instrumento rinde más en pesos si invertís hoy y medís el resultado a 1, 2, 3 o 6 meses. Cambiá los supuestos y todo se recalcula. Es una simulación bajo supuestos, no una recomendación de inversión.</p>'+
       '<div class="ctl">'+
         field('a-infl','Inflación mensual esperada (%)',A.inflMensual,0.1)+
         field('a-reinv','Reinversión de lo que vence (TNA %)',A.reinvTna,0.5)+
@@ -265,7 +285,7 @@ footer a{color:var(--accent)}
             '<td>'+ret(e.Rs)+'</td></tr>';
         });
       });
-      $('rank-top').innerHTML='<table><thead><tr><th>Plazo</th><th>#</th><th>Especie</th><th>Tipo</th><th>Cómo termina</th><th>Rinde</th><th>Equiv. TNA</th><th>Equiv. TEM</th><th>Si la tasa sube 3 pp</th></tr></thead><tbody>'+body+'</tbody></table>';
+      $('rank-top').innerHTML='<table><thead><tr><th>Plazo</th><th>#</th><th>Especie</th><th>Tipo</th><th>Cómo termina</th><th>Rinde</th><th title="Tasa nominal anual equivalente al resultado del plazo, llevada a 365 días.">Equiv. TNA</th><th title="Tasa efectiva mensual equivalente, compuesta a 30 días.">Equiv. TEM</th><th>Si la tasa sube 3 pp</th></tr></thead><tbody>'+body+'</tbody></table>';
 
       var mx=pool.slice().sort(function(a,b){return a.days-b.days;});
       var cols=HZ.map(function(h){
@@ -290,8 +310,10 @@ footer a{color:var(--accent)}
   function init(D){
     var settle=ts(D.settle);
     var ins = D.instruments || [];
-    (function(){var s=D.sources||[],e=document.getElementById('src');if(!e||!s.length)return;
-      e.innerHTML='Fuentes: '+s.map(function(x){return '<a href="'+x.u+'" target="_blank" rel="noopener">'+x.n+'</a> ('+x.uso+')';}).join('; ')+'. CER de emisión de los bonos cero cupón = CER del BCRA a 14 días corridos antes de la fecha de emisión (la que informan las resoluciones de Finanzas); con ese método se reproduce el valor publicado de TZXS7.';})();
+    (function(){var e=document.getElementById('src');if(!e)return;
+      var s=(D.sources||[]).filter(function(x){try{return /\.gob\.ar$/.test(new URL(x.u).hostname);}catch(_){return false;}});
+      if(!s.length)return;
+      e.innerHTML='<strong>Fuentes oficiales.</strong> '+s.map(function(x){return '<a href="'+x.u+'" target="_blank" rel="noopener">'+x.n+'</a> ('+x.uso+')';}).join('; ')+'.';})();
     fixedMeta = ins.filter(function(m){return m.fam==='fixed' && m.vn;});
     cerMeta = ins.filter(function(m){return m.fam==='cer';});
     varMeta = ins.filter(function(m){return m.fam==='var';});
@@ -327,11 +349,11 @@ footer a{color:var(--accent)}
       {k:'vn',l:'VN al vto.',f:function(r){return nf(r.vn,2)+(r.est?'†':'');}},
       {k:'p',l:'Precio',f:function(r){return nf(r.p,3);}},
       {k:'chg',l:'Var. día',f:function(r){return chg(r.chg);}},
-      {k:'ret',l:'Rend. período',f:function(r){return pc(r.ret);}},
-      {k:'tna',l:'TNA',f:function(r){return pc(r.tna,1);}},
-      {k:'tea',l:'TEA',f:function(r){return pc(r.tea,1);}},
-      {k:'tem',l:'TEM',f:function(r){return '<span class="bar" style="width:'+Math.round(r.tem/maxTem*44)+'px"></span>'+pc(r.tem);}},
-      {k:'vs',l:'Vs. curva',f:function(r){return vsf(r.vs);}}
+      {k:'ret',l:'Rend. período',tip:'Ganancia hasta el vencimiento si se compra hoy al precio de cierre y se mantiene.',f:function(r){return pc(r.ret);}},
+      {k:'tna',l:'TNA',tip:'Tasa nominal anual: el rendimiento del período llevado a 365 días, sin capitalizar.',f:function(r){return pc(r.tna,1);}},
+      {k:'tea',l:'TEA',tip:'Tasa efectiva anual: el rendimiento del período capitalizado a un año. Es la cifra comparable entre plazos distintos.',f:function(r){return pc(r.tea,1);}},
+      {k:'tem',l:'TEM',tip:'Tasa efectiva mensual, compuesta a 30 días.',f:function(r){return '<span class="bar" style="width:'+Math.round(r.tem/maxTem*44)+'px"></span>'+pc(r.tem);}},
+      {k:'vs',l:'Vs. curva',tip:'Diferencia entre el rendimiento del instrumento y la curva ajustada para ese plazo.',f:function(r){return vsf(r.vs);}}
     ];
     var pf=document.getElementById('p-fija');
     pf.innerHTML='<div class="card"><h2>TEM según plazo</h2><p class="sub">Cuánto rinde por mes cada letra (círculo) y bono capitalizable (cuadrado). Lo que queda sobre la curva rinde más que el promedio para su plazo; lo que queda debajo, menos.</p>'+
@@ -360,11 +382,11 @@ footer a{color:var(--accent)}
       {k:'days',l:'Días',f:function(r){return r.days;}},
       {k:'p',l:'Precio',f:function(r){return nf(r.p,2);}},
       {k:'chg',l:'Var. día',f:function(r){return chg(r.chg);}},
-      {k:'coef',l:'Coef. CER',f:function(r){return nf(r.coef,4);}},
-      {k:'par',l:'Paridad',f:function(r){return pc(r.par,1);}},
-      {k:'tir',l:'TIR real',f:function(r){return r.tir==null?'—':'<span class="bar cer" style="width:'+Math.max(0,Math.round(r.tir/maxTir*44))+'px"></span>'+pc(r.tir,1);}},
-      {k:'tean',l:'TEA nominal est.',f:function(r){return r.tean==null?'—':pc(r.tean,1);}},
-      {k:'vs',l:'Vs. curva',f:function(r){return vsf(r.vs);}}
+      {k:'coef',l:'Coef. CER',tip:'CER de cálculo dividido el CER de emisión: cuánto se ajustó el capital desde que se emitió.',f:function(r){return nf(r.coef,4);}},
+      {k:'par',l:'Paridad',tip:'Precio dividido el valor técnico (capital ajustado por CER). Debajo de 100% cotiza con descuento.',f:function(r){return pc(r.par,1);}},
+      {k:'tir',l:'TIR real',tip:'Rendimiento anual por encima de la inflación (CER) si se mantiene hasta el vencimiento.',f:function(r){return r.tir==null?'—':'<span class="bar cer" style="width:'+Math.max(0,Math.round(r.tir/maxTir*44))+'px"></span>'+pc(r.tir,1);}},
+      {k:'tean',l:'TEA nominal est.',tip:'Rendimiento anual en pesos suponiendo la inflación mensual de los supuestos.',f:function(r){return r.tean==null?'—':pc(r.tean,1);}},
+      {k:'vs',l:'Vs. curva',tip:'Diferencia entre el rendimiento del instrumento y la curva ajustada para ese plazo.',f:function(r){return vsf(r.vs);}}
     ];
     var pcer=document.getElementById('p-cer');
     pcer.innerHTML='<div class="card"><h2>TIR real según plazo</h2><p class="sub">TIR real: rendimiento por encima de la inflación (CER) si se mantiene el bono hasta el vencimiento, sin proyectar inflación futura (por eso en plazos cortos es chica y muy sensible al precio). TEA nominal est.: lo que rendiría en pesos suponiendo la inflación mensual de los supuestos; es la cifra comparable con las tasas fijas. Sobre la curva rinde más que el promedio para su plazo; debajo, menos.</p>'+
@@ -413,7 +435,7 @@ footer a{color:var(--accent)}
 
   fetch('data.json',{cache:'no-cache'}).then(function(r){if(!r.ok) throw new Error(r.status);return r.json();}).then(init).catch(function(e){
     document.getElementById('stamp').textContent='';
-    document.getElementById('p-fija').innerHTML='<div class="err">No se pudieron cargar los datos ('+e.message+'). Reintentá en unos minutos.</div>';
+    document.getElementById('p-fija').innerHTML='<div class="err">Algo se torció en la curva. Reintentá en unos minutos.<small>Si sigue pasando, <a href="https://github.com/DNAngeluS/curvar/issues/new" target="_blank" rel="noopener">reportalo en GitHub</a> (detalle: '+e.message+').</small></div>';
   });
 })();
 </script>

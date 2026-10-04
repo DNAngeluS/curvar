@@ -1,4 +1,6 @@
-# Curva en Pesos
+# Curv.ar
+
+La curva en pesos, sin vueltas.
 
 Curva de rendimientos de instrumentos en pesos del Tesoro argentino: LECAP, BONCAP, bonos CER, TAMAR y duales. Incluye una pestaña "Mejor por plazo" que compara qué instrumento rinde más a 1, 2, 3 y 6 meses con supuestos editables.
 
