@@ -53,7 +53,7 @@ Después de la publicación del REM del BCRA (primeros días hábiles del mes), 
 1. Leer el log: `gh run view <id> --log-failed`.
 2. Reproducir en local: `npm run update:dry` (necesita red a data912 y BCRA).
 3. Corregir `scripts/lib.mjs` o `scripts/update.mjs`, agregar un test que cubra el caso y correr `npm test`.
-4. Abrir un PR en una rama (`git switch -c fix/<tema>`) con la causa y la evidencia. No pushear a `main` cambios al script. El token del agente no debe tener permiso de `workflows`, así que el archivo `.github/workflows/update.yml` se modifica a mano.
+4. Abrir un PR en una rama (`git switch -c fix/<tema>`) con la causa y la evidencia. No pushear a `main` cambios al script. Los cambios a `.github/workflows/update.yml` también van por PR y los mergea el dueño.
 5. Nunca desactivar la verificación TLS. Si una fuente tiene un problema de certificado, documentarlo en el issue y buscar una fuente alternativa.
 6. Mientras el script no funcione, el agente puede actualizar `data.json` a mano siguiendo las reglas de arriba y mergear solo ese archivo.
 
