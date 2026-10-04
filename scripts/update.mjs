@@ -31,7 +31,7 @@ async function getJson(name, tries = 3) {
     try {
       const res = await fetch(SOURCES[name], {
         signal: AbortSignal.timeout(20000),
-        headers: { accept: 'application/json', 'user-agent': 'curva-en-pesos (github.com/dnangelus/curva-en-pesos)' },
+        headers: { accept: 'application/json', 'user-agent': 'curvar (github.com/DNAngeluS/curvar)' },
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
