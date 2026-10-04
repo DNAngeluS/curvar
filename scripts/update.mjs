@@ -22,7 +22,7 @@ const args = new Set(process.argv.slice(2));
 const dryRun = args.has('--dry-run') || process.env.DRY_RUN === '1' || process.env.DRY_RUN === 'true';
 const force = args.has('--force') || process.env.FORCE === '1' || process.env.FORCE === 'true';
 
-async function getJson(name, tries = 3) {
+async function getJson(name, tries = 5) {
   if (process.env.FIXTURE_DIR) {
     return JSON.parse(await readFile(join(process.env.FIXTURE_DIR, `${name}.json`), 'utf8'));
   }
@@ -37,7 +37,7 @@ async function getJson(name, tries = 3) {
       return await res.json();
     } catch (e) {
       last = e;
-      if (i < tries) await new Promise((r) => setTimeout(r, 2000 * i));
+      if (i < tries) await new Promise((r) => setTimeout(r, 5000 * i));
     }
   }
   throw new Error(`${name}: ${last?.cause?.code ?? last?.message ?? 'error desconocido'}`);
