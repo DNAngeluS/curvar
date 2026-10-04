@@ -15,7 +15,8 @@ El script **no** agrega instrumentos ni toca la inflación esperada: los reporta
 
 1. `gh run list --workflow update.yml --limit 3`. Si la última corrida de hoy no está en `success`, ir a "Si falló una fuente".
 2. `gh issue list --label curva-revision --state open` y `--label curva-fallo`. Resolver lo que haya y cerrar el issue con un comentario de lo hecho.
-3. Si el workflow aparece deshabilitado (GitHub desactiva los programados tras 60 días sin actividad en repos públicos), reactivarlo con `gh workflow enable update.yml`.
+3. Si la corrida está en `success` pero `data.json` no cambió en `main`, mirar `gh pr list --head data/auto`: el bot publica por PR y un PR abierto significa que no se pudo mergear (ver el log del paso "Publicar data.json por PR").
+4. Si el workflow aparece deshabilitado (GitHub desactiva los programados tras 60 días sin actividad en repos públicos), reactivarlo con `gh workflow enable update.yml`.
 
 ## Reglas de trabajo
 
@@ -55,7 +56,7 @@ Después de la publicación del REM del BCRA (primeros días hábiles del mes), 
 3. Corregir `scripts/lib.mjs` o `scripts/update.mjs`, agregar un test que cubra el caso y correr `npm test`.
 4. Abrir un PR en una rama (`git switch -c fix/<tema>`) con la causa y la evidencia. No pushear a `main` cambios al script. Los cambios a `.github/workflows/update.yml` también van por PR y los mergea el dueño.
 5. Nunca desactivar la verificación TLS. Si una fuente tiene un problema de certificado, documentarlo en el issue y buscar una fuente alternativa.
-6. Mientras el script no funcione, el agente puede actualizar `data.json` a mano siguiendo las reglas de arriba y mergear solo ese archivo.
+6. Mientras el script no funcione, el agente puede actualizar `data.json` a mano siguiendo las reglas de arriba, en una rama `data/<tema>` que cambie solo ese archivo, y pedir el merge por PR. No hay push directo a `main`: lo bloquea el ruleset.
 
 ## Límites
 
