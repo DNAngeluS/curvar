@@ -1,0 +1,4 @@
+/* Carril "site": estética y extras. Solo puede usar clases propias (prefijo x-) o #extras.
+   El tablero no depende de este archivo; si falta o falla, la página funciona igual. */
+#extras .cafe{margin-top:6px}
+#extras .cafe img{display:block;height:auto;max-width:100%}

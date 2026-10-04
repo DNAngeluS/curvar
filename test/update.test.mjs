@@ -89,6 +89,7 @@ test('updateData: actualización normal', () => {
   assert.equal(next.settle, '2026-10-05');
   assert.equal(next.cer.refDate, '2026-10-16');
   assert.equal(next.cer.dailyRate, Math.round((855 / 854.45861540882 - 1) * 1e8) / 1e8);
+  assert.deepEqual(next.feriados, hol.dates.filter((d) => d >= '2026-09-02'), 'publica los feriados desde 30 días antes de asOf');
   assert.equal(next.badlar.tna, 23.1875);
   assert.equal(next.assumptions.reinvTna, 23.1875);
   assert.deepEqual(Object.keys(next), Object.keys(prev), 'conserva el orden de claves');

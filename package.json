@@ -8,7 +8,9 @@
   "scripts": {
     "test": "node --test test/*.test.mjs",
     "update": "node scripts/update.mjs",
-    "update:dry": "node scripts/update.mjs --dry-run --force"
+    "update:dry": "node scripts/update.mjs --dry-run --force",
+    "smoke": "node scripts/smoke.mjs",
+    "smoke:sin-extras": "node scripts/smoke.mjs --sin-extras"
   },
   "engines": {
     "node": ">=20"

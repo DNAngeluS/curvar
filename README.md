@@ -30,13 +30,17 @@ GitHub Actions (lun a vie, 18:30 Buenos Aires)
 ## Uso local
 
 ```bash
-npm test                 # 16 tests, sin red
+npm test                 # sin red: script, forma de data.json y guarda de carriles
 npm run update:dry       # calcula y muestra el reporte sin escribir data.json (requiere red)
 node scripts/update.mjs --force   # actualiza data.json fuera de horario
 npx serve .              # ver la página en local (o cualquier servidor estático)
 ```
 
 Para probar offline: `FIXTURE_DIR=<carpeta con notes.json, bonds.json, cer.json, badlar.json> NOW=2026-10-02T21:30:00Z node scripts/update.mjs --dry-run`.
+
+## Cómo se trabaja
+
+El tablero económico y lo cosmético (estética, donaciones) van en carriles separados, con ramas y controles distintos: ver [`docs/WORKFLOW.md`](docs/WORKFLOW.md).
 
 ## Puesta en marcha (una vez)
 

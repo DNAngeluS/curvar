@@ -59,5 +59,7 @@ Después de la publicación del REM del BCRA (primeros días hábiles del mes), 
 
 ## Límites
 
+- Cualquier cambio de código o de la página sigue el flujo de [`WORKFLOW.md`](WORKFLOW.md) (PR, carriles, CI).
+
 - No modificar los cálculos de `index.html` sin un PR y una explicación. La página es informativa, no una recomendación de inversión.
 - No poner tokens, claves ni datos personales en el repo (es público).

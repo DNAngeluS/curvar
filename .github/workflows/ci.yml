@@ -1,0 +1,29 @@
+name: CI
+
+# Valida cada PR antes de mergear. No publica nada: el deploy sigue siendo de update.yml al mergear a main.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  tablero:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Tests (script, forma de data.json, carriles)
+        run: npm test
+      - name: Guarda de carriles
+        run: node scripts/check-lanes.mjs "${{ github.head_ref }}" origin/main
+      - name: El sitio se arma completo
+        run: |
+          mkdir site && cp index.html data.json site/ && cp -r extras site/
+          test -s site/extras/extras.js && test -s site/extras/extras.css
