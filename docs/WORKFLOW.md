@@ -71,7 +71,7 @@ En `.github/rulesets/` hay dos reglas listas para importar en **Settings → Rul
 
 | Archivo | Qué hace | Cuándo |
 |---|---|---|
-| `main-basico.json` | Impide borrar `main` y el force-push. No afecta al bot diario. | Ya. |
-| `main-con-pr.json` | Exige PR y el check `tablero` de CI; el rol admin puede saltearlo. | Después de mergear el PR que cambia `update.yml` y de comprobar una corrida manual en verde (abajo). |
+| `main-basico.json` | Impide borrar `main` y el force-push. | Redundante si está activo `main-con-pr.json` (incluye lo mismo). |
+| `main-con-pr.json` | Exige PR y el check `tablero` de CI; el rol admin puede saltearlo. | **Activo desde el 04/10/2026.** La primera prueba del bot por PR es la corrida programada del lunes 05/10 (la manual del 04/10 no tuvo cambios de precios y salteó ese paso). |
 
-**Cómo publica el bot con `main-con-pr.json` activo:** `update.yml` sube `data.json` a la rama `data/auto`, abre un PR y mergea con squash. Los PR creados con `GITHUB_TOKEN` no disparan `ci.yml`, así que el job reporta él mismo el estado `tablero` en verde, después de correr los tests y de que el script validó los datos. Requisitos en **Settings → Actions → General**: *Workflow permissions* en lectura y escritura, y tildado *Allow GitHub Actions to create and approve pull requests*. Si una actualización queda sin mergear, el PR `data/auto` queda abierto y la siguiente corrida lo reutiliza.
+**Cómo publica el bot con `main-con-pr.json` activo:** `update.yml` sube `data.json` a la rama `data/auto`, abre un PR y mergea con squash. Los PR creados con `GITHUB_TOKEN` no disparan `ci.yml`, así que el job reporta él mismo el estado `tablero` en verde, después de correr los tests y de que el script validó los datos. Requisitos en **Settings → Actions → General**: *Workflow permissions* en lectura y escritura, y tildado *Allow GitHub Actions to create and approve pull requests*. Si una actualización queda sin mergear, el PR `data/auto` queda abierto y la siguiente corrida lo reutiliza. El automerge vale solo para el `data.json` que genera el script; código, página y workflows nunca se automergean.
