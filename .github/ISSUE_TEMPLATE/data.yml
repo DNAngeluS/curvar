@@ -1,0 +1,29 @@
+name: Encontré un dato raro
+description: Un precio, una tasa o un vencimiento que no cierra, o un instrumento que falta.
+title: "Dato: "
+labels: ["data"]
+body:
+  - type: input
+    id: especie
+    attributes:
+      label: ¿Qué especie o instrumento?
+      placeholder: "Ej.: S30N6, TZXD7"
+    validations:
+      required: true
+  - type: textarea
+    id: que
+    attributes:
+      label: ¿Qué número se ve raro?
+      description: Precio, TEA, TIR real, vencimiento, instrumento faltante, fuente caída…
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: ¿Qué esperabas ver?
+      description: Si tenés un enlace a la fuente (BYMA, BCRA, comparatasas.ar, prospecto), mejor.
+  - type: input
+    id: fecha
+    attributes:
+      label: Fecha de cierre que muestra la página
+      placeholder: "Ej.: 02 oct 26"

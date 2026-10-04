@@ -1,0 +1,17 @@
+name: Algo se rompió
+description: La página no carga, una pestaña falla o algo no se comporta como debería.
+title: "Error: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: que
+    attributes:
+      label: ¿Qué pasó?
+      description: Qué hiciste, qué esperabas y qué viste en cambio.
+    validations:
+      required: true
+  - type: input
+    id: dispositivo
+    attributes:
+      label: Navegador y dispositivo
+      placeholder: "Ej.: Safari en iPhone, Chrome en Windows"

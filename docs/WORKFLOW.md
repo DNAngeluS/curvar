@@ -6,7 +6,7 @@ Cómo se prueba y se cambia este repo sin poner en riesgo el tablero económico.
 
 | Carril | Qué es | Archivos | Rama | Riesgo |
 |---|---|---|---|---|
-| **Tablero** (`core`) | Cálculos, datos, fuentes, script y workflow de actualización | `index.html`, `data.json`, `scripts/`, `config/`, `test/`, `.github/workflows/`, `.github/rulesets/`, `package.json`, `docs/RUNBOOK.md` | `fix/…`, `feat/…`, `data/…` | Alto: lo que ve quien decide con la curva |
+| **Tablero** (`core`) | Cálculos, datos, fuentes, script y workflow de actualización | `index.html`, `data.json`, `scripts/`, `config/`, `test/`, `.github/workflows/`, `.github/rulesets/`, `.github/ISSUE_TEMPLATE/`, `package.json`, `docs/RUNBOOK.md` | `fix/…`, `feat/…`, `data/…` | Alto: lo que ve quien decide con la curva |
 | **Sitio** (`site`) | Estética, donaciones, textos de presentación, SEO, íconos | `extras/`, `assets/`, `README.md`, `LICENSE` | `site/…` | Bajo: no toca cálculos ni datos |
 
 `index.html` solo tiene tres puntos de enganche para el carril de sitio: `extras/extras.css`, `extras/extras.js` y el contenedor `#extras` del pie. Todo lo demás de la estética se hace desde esos archivos, con clases propias (prefijo `x-`) y dentro de `try/catch`. Si `extras/` falla o no carga, el tablero anda igual (`npm run smoke:sin-extras` lo comprueba).
