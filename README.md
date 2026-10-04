@@ -2,7 +2,7 @@
 
 Curva de rendimientos de instrumentos en pesos del Tesoro argentino: LECAP, BONCAP, bonos CER, TAMAR y duales. Incluye una pestaña "Mejor por plazo" que compara qué instrumento rinde más a 1, 2, 3 y 6 meses con supuestos editables.
 
-Página: https://dnangelus.github.io/curvar/
+Página: https://dnangelus.ar/curvar/
 
 > Material informativo. No es una recomendación de inversión.
 
