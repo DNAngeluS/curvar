@@ -155,6 +155,9 @@ export function updateData(prev, { panel, cer, badlar }, now, holidaysCfg) {
   next.asOf = dates.asOf;
   next.settle = dates.settle;
   next.generated = dates.generated;
+  // La página usa estos feriados para el rezago de 10 días hábiles del CER; basta desde 30 días antes de asOf.
+  const since = toIso(toTs(dates.asOf) - 30 * DAY);
+  next.feriados = holidaysCfg.dates.filter((d) => d >= since);
   if (cer && cer.length >= 2) {
     next.cer = {
       refDate: cer[0].fecha,

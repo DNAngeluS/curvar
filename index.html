@@ -75,8 +75,6 @@ tr.first td{border-top:2px solid var(--line)}
 td.best{font-weight:600;outline:1px solid var(--accent);outline-offset:-2px}
 footer{font-size:.78rem;color:var(--muted);display:flex;flex-direction:column;gap:6px}
 footer a{color:var(--accent)}
-footer .cafe{margin-top:6px}
-footer .cafe img{display:block;height:auto;max-width:100%}
 </style>
 
 <div class="wrap">
@@ -99,7 +97,7 @@ footer .cafe img{display:block;height:auto;max-width:100%}
     <div>Precios: data912 (panel BYMA, cierre del día hábil anterior, con demora de hasta 2 horas). CER y BADLAR: <a href="https://www.bcra.gob.ar/en/central-bank-api-catalog/" target="_blank" rel="noopener">API del BCRA</a>. Valores al vencimiento: resumen de negociación IAMC del 26/05/2026 y ficha de la S29E7 en Boston Asset Management.</div>
     <div id="src"></div>
     <div>Cálculo de tasa fija: rendimiento = VN al vencimiento ÷ precio − 1 sobre los días hasta el vencimiento desde la liquidación (T+1). TNA con base 365, TEA compuesta anual, TEM compuesta a 30 días. Material informativo, no es una recomendación de inversión.</div>
-    <div class="cafe"><a href='https://cafecito.app/dnangelus' rel='noopener' target='_blank'><img srcset='https://cdn.cafecito.app/imgs/buttons/button_4.png 1x, https://cdn.cafecito.app/imgs/buttons/button_4_2x.png 2x, https://cdn.cafecito.app/imgs/buttons/button_4_3.75x.png 3.75x' src='https://cdn.cafecito.app/imgs/buttons/button_4.png' alt='Invitame un café en cafecito.app' /></a></div>
+    <div id="extras"></div>
   </footer>
 </div>
 
@@ -196,7 +194,7 @@ footer .cafe img{display:block;height:auto;max-width:100%}
   }
 
   // Ranking por horizonte: valor esperado de 1 peso invertido hoy, medido a 30/60/90/180 días.
-  function buildRank(D, fixed, cer, cerOn, CL){
+  function buildRank(D, fixed, cer, cerOn, lag){
     var $ = function(i){return document.getElementById(i);};
     var A = D.assumptions;
     var HZ = [{d:30,l:'1 mes'},{d:60,l:'2 meses'},{d:90,l:'3 meses'},{d:180,l:'6 meses'}];
@@ -209,8 +207,8 @@ footer .cafe img{display:block;height:auto;max-width:100%}
         if(r.days<=H) return r.vn/r.p*tail(H-r.days);
         return (r.vn/Math.pow(1+r.tea+shift/100,(r.days-H)/365))/r.p;
       }
-      if(r.days<=H) return (100*cerOn(r.days-CL,m)/r.emi)/r.p*tail(H-r.days);
-      return (100*cerOn(H-CL,m)/r.emi/Math.pow(1+r.tir+shift/100,(r.days-H)/365))/r.p;
+      if(r.days<=H) return (100*cerOn(lag(r.days),m)/r.emi)/r.p*tail(H-r.days);
+      return (100*cerOn(lag(H),m)/r.emi/Math.pow(1+r.tir+shift/100,(r.days-H)/365))/r.p;
     }
     function field(id,l,v,st){
       return '<label class="fld" for="'+id+'"><span>'+l+'</span><input id="'+id+'" type="number" inputmode="decimal" step="'+st+'" value="'+v+'"></label>';
@@ -299,13 +297,17 @@ footer .cafe img{display:block;height:auto;max-width:100%}
     varMeta = ins.filter(function(m){return m.fam==='var';});
     var days=function(v){return Math.round((ts(v)-settle)/DAY);};
     var live=function(m){return D.prices[m.t] && days(m.vto)>0;};
-    // CER: los bonos ajustan por el índice de 10 días hábiles antes (aprox. 14 días corridos).
-    var kd = Math.round((ts(D.cer.refDate)-settle)/DAY), CL = 14;
+    // CER: los bonos ajustan por el índice de 10 días hábiles antes (sin fines de semana ni feriados / no laborables).
+    var kd = Math.round((ts(D.cer.refDate)-settle)/DAY);
+    var NB = {}; (D.feriados||[]).forEach(function(f){NB[ts(f)]=1;});
+    function lag(t){var n=10, x=settle+t*DAY, w;
+      while(n>0){x-=DAY; w=new Date(x).getUTCDay(); if(w!==0 && w!==6 && !NB[x]) n--;}
+      return Math.round((x-settle)/DAY);}
     function cerOn(t,m){
       if(t<=kd) return D.cer.refValue/Math.pow(1+D.cer.dailyRate, kd-t);
       return D.cer.refValue*Math.pow(Math.pow(1+m/100,1/30), t-kd);
     }
-    var cerS = cerOn(-CL, 0);
+    var cerS = cerOn(lag(0), 0);
 
     // Tasa fija
     var fixed = fixedMeta.filter(live).map(function(m){
@@ -344,7 +346,8 @@ footer .cafe img{display:block;height:auto;max-width:100%}
     var cer = cerMeta.filter(live).map(function(m){
       var q=D.prices[m.t], d=days(m.vto), coef=m.emi?cerS/m.emi:null, par=coef?q.p/(100*coef):null;
       var tir= coef? Math.pow(100*coef/q.p,365/d)-1 : null;
-      return {t:m.t,vto:ts(m.vto),days:d,p:q.p,chg:q.chg,emi:m.emi,coef:coef,par:par,tir:tir};
+      var tean = m.emi? Math.pow(100*cerOn(lag(d),D.assumptions.inflMensual)/m.emi/q.p,365/d)-1 : null;
+      return {t:m.t,vto:ts(m.vto),days:d,p:q.p,chg:q.chg,emi:m.emi,coef:coef,par:par,tir:tir,tean:tean};
     });
     var cerPts=cer.filter(function(r){return r.tir!=null;});
     var ccurve=cerPts.length>=3?polyfit(cerPts.map(function(r){return r.days;}),cerPts.map(function(r){return r.tir;}),cerPts.length>=6?2:1):null;
@@ -360,10 +363,11 @@ footer .cafe img{display:block;height:auto;max-width:100%}
       {k:'coef',l:'Coef. CER',f:function(r){return nf(r.coef,4);}},
       {k:'par',l:'Paridad',f:function(r){return pc(r.par,1);}},
       {k:'tir',l:'TIR real',f:function(r){return r.tir==null?'—':'<span class="bar cer" style="width:'+Math.max(0,Math.round(r.tir/maxTir*44))+'px"></span>'+pc(r.tir,1);}},
+      {k:'tean',l:'TEA nominal est.',f:function(r){return r.tean==null?'—':pc(r.tean,1);}},
       {k:'vs',l:'Vs. curva',f:function(r){return vsf(r.vs);}}
     ];
     var pcer=document.getElementById('p-cer');
-    pcer.innerHTML='<div class="card"><h2>TIR real según plazo</h2><p class="sub">Rendimiento por encima de la inflación (CER) si se mantiene el bono hasta el vencimiento, sin proyectar inflación futura. Sobre la curva rinde más que el promedio para su plazo; debajo, menos.</p>'+
+    pcer.innerHTML='<div class="card"><h2>TIR real según plazo</h2><p class="sub">TIR real: rendimiento por encima de la inflación (CER) si se mantiene el bono hasta el vencimiento, sin proyectar inflación futura (por eso en plazos cortos es chica y muy sensible al precio). TEA nominal est.: lo que rendiría en pesos suponiendo la inflación mensual de los supuestos; es la cifra comparable con las tasas fijas. Sobre la curva rinde más que el promedio para su plazo; debajo, menos.</p>'+
       '<div class="legend"><span><i class="ci cer"></i>Cero cupón CER</span><span><i class="ln"></i>Curva ajustada</span></div><div id="ch-cer"></div></div>'+
       '<div class="card"><h2>Bonos y letras ajustables por CER</h2><div class="scroll" id="tb-cer"></div>'+
       '<p class="note">CER de cálculo (10 días hábiles antes de la liquidación): '+nf(cerS,4)+', estimado día a día con el último dato del BCRA, que llega al '+fd(ts(D.cer.refDate))+'. Las filas con — todavía no tienen cargado su CER de emisión, así que muestran precio sin TIR. La TIR de bonos con cupón (TX26, TX28, TX31) no se calcula acá.</p></div>';
@@ -385,7 +389,7 @@ footer .cafe img{display:block;height:auto;max-width:100%}
       '<p class="note">Su pago depende de la TAMAR futura, así que no hay un rendimiento único para calcular. Se muestra el precio por cada VN 100 y su variación diaria.</p></div>';
     sortable(document.getElementById('tb-var'),vcols,vr,'days',1);
 
-    buildRank(D, fixed, cer, cerOn, CL);
+    buildRank(D, fixed, cer, cerOn, lag);
 
     // Cabecera
     document.getElementById('stamp').innerHTML='Cierre <b>'+fd(ts(D.asOf))+'</b> · liquidación T+1 <b>'+fd(settle)+'</b>';
@@ -414,4 +418,5 @@ footer .cafe img{display:block;height:auto;max-width:100%}
 })();
 </script>
 
+<script src="extras/extras.js" defer onerror="void 0"></script>
 </body></html>
