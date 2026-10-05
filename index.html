@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset=utf8><title>Curv.ar — Bonos y letras argentinas</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="Bonos, letras y tasas argentinas para comparar rendimientos sin abrir cinco planillas."><meta property="og:title" content="Curv.ar"><meta property="og:description" content="La curva en pesos, sin vueltas. Bonos, letras y tasas argentinas en un solo lugar."><meta property="og:type" content="website"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="es"><head><meta charset=utf8><title>Curv.ar — Bonos y letras argentinas</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="Bonos, letras y tasas argentinas para comparar rendimientos sin abrir cinco planillas."><meta property="og:title" content="Curv.ar"><meta property="og:description" content="La curva en pesos, sin vueltas. Bonos, letras y tasas argentinas en un solo lugar."><meta property="og:type" content="website"><meta property="og:image" content="https://dnangelus.ar/curvar/assets/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><link rel="apple-touch-icon" href="assets/icon-192.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -19,6 +19,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-display);padding-
 .wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
 header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
 h1{font-size:clamp(1.6rem,4.5vw,2.3rem);font-weight:800;letter-spacing:-.02em;line-height:1.05;margin:0;text-wrap:balance}
+h1 img{display:block;height:clamp(40px,9vw,56px);width:auto}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) h1 img{background:#fff;border-radius:8px;padding:4px 10px}}
+:root[data-theme="dark"] h1 img{background:#fff;border-radius:8px;padding:4px 10px}
 .stamp{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);text-align:right}
 .stamp b{color:var(--ink);font-weight:600}
 .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
@@ -84,12 +87,24 @@ footer strong{color:var(--ink);font-weight:600}
 .ask p:last-child{margin:6px 0 0;font-size:.8rem}
 .err small{display:block;margin-top:4px;opacity:.85}
 th[title] button,th[title]{cursor:help}
+tbody tr[data-t]{cursor:pointer}
+tbody tr[data-t]:hover td{background:var(--bg)}
+tbody tr[data-t]:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+tbody tr.sel td{background:var(--grid);background:color-mix(in srgb,var(--accent) 14%,var(--surface))}
+tbody tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+svg .mk{cursor:pointer;outline:none}
+svg .mk .halo{fill:transparent;stroke:transparent;stroke-width:2}
+svg .mk.sel .halo{stroke:var(--ink)}
+svg .mk:focus-visible .halo{stroke:var(--accent)}
+svg .mk.sel text.pt{font-size:11px}
+svg.has-sel .mk:not(.sel){opacity:.4}
+svg .gap.sel{opacity:1;stroke:var(--ink);stroke-width:1.5}
 </style>
 
 <div class="wrap">
   <header>
     <div>
-      <h1>Curv.ar</h1>
+      <h1><img src="assets/logo.png" width="378" height="120" alt="Curv.ar"></h1>
       <p class="tag">La curva en pesos, sin vueltas.</p>
     </div>
     <div class="stamp"><div id="stamp">Cargando datos…</div><div class="hlinks"><a href="https://github.com/DNAngeluS/curvar" target="_blank" rel="noopener">GitHub</a></div></div>
@@ -141,9 +156,10 @@ th[title] button,th[title]{cursor:help}
     var h='<table><thead><tr>'+cols.map(function(c){
       return '<th'+(c.tip?' title="'+c.tip+'"':'')+'><button type="button" data-k="'+c.k+'"'+(s.k===c.k?' data-dir="'+s.dir+'"':'')+'>'+c.l+'</button></th>';
     }).join('')+'</tr></thead><tbody>'+sorted.map(function(r){
-      return '<tr>'+cols.map(function(c){return '<td class="'+(c.cls||'')+'">'+c.f(r)+'</td>';}).join('')+'</tr>';
+      return '<tr'+(r.t?' data-t="'+r.t+'" tabindex="0"':'')+'>'+cols.map(function(c){return '<td class="'+(c.cls||'')+'">'+c.f(r)+'</td>';}).join('')+'</tr>';
     }).join('')+'</tbody></table>';
     host.innerHTML=h;
+    if(host._apply) host._apply();
     host.querySelectorAll('th button').forEach(function(b){
       b.addEventListener('click',function(){
         var k=b.getAttribute('data-k');
@@ -151,6 +167,25 @@ th[title] button,th[title]{cursor:help}
         sortable(host,cols,rows,s.k,s.dir);
       });
     });
+  }
+
+  // Selección compartida: un instrumento resaltado a la vez, en el gráfico y en la fila de la tabla.
+  function linkSelection(chart, table){
+    var sel=null;
+    function mark(e){var on=e.getAttribute('data-t')===sel;e.classList.toggle('sel',on);if(e.hasAttribute('aria-pressed')||e.getAttribute('role')==='button')e.setAttribute('aria-pressed',on);}
+    function apply(){
+      chart.querySelectorAll('[data-t]').forEach(mark);
+      var svg=chart.querySelector('svg');if(svg) svg.classList.toggle('has-sel',sel!=null);
+      table.querySelectorAll('tbody tr[data-t]').forEach(mark);
+    }
+    function pick(n){var t=n&&n.getAttribute('data-t');if(!t)return;sel=sel===t?null:t;apply();}
+    chart.addEventListener('click',function(e){pick(e.target.closest('.mk'));});
+    table.addEventListener('click',function(e){pick(e.target.closest('tbody tr[data-t]'));});
+    [chart,table].forEach(function(h){h.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var n=e.target.closest('.mk,tbody tr[data-t]');if(!n)return;
+      e.preventDefault();pick(n);});});
+    table._apply=apply;
   }
 
   function niceTicks(lo,hi,n){
@@ -201,14 +236,14 @@ th[title] button,th[title]{cursor:help}
     g+='<text class="ttl" x="'+(L)+'" y="9">'+o.yl+'</text>';
     if(curve.length){
       g+='<path class="curve" d="'+curve.map(function(c,i){return (i?'L':'M')+X(c[0]).toFixed(1)+' '+Y(c[1]).toFixed(1);}).join(' ')+'"/>';
-      pts.forEach(function(p){g+='<line class="gap" x1="'+X(p.x)+'" x2="'+X(p.x)+'" y1="'+Y(p.y)+'" y2="'+Y(o.f(p.x))+'"/>';});
+      pts.forEach(function(p){g+='<line class="gap" data-t="'+p.t+'" x1="'+X(p.x)+'" x2="'+X(p.x)+'" y1="'+Y(p.y)+'" y2="'+Y(o.f(p.x))+'"/>';});
     }
     pts.slice().sort(function(a,b){return a.x-b.x;}).forEach(function(p,i){
       var cx=X(p.x), cy=Y(p.y), col=p.cer?'var(--cer)':'var(--accent)';
       var shape = p.sq ? '<rect x="'+(cx-4.5)+'" y="'+(cy-4.5)+'" width="9" height="9" fill="'+col+'"/>' : '<circle cx="'+cx+'" cy="'+cy+'" r="5" fill="'+col+'"/>';
       var above = o.f ? p.y>=o.f(p.x) : i%2===0, ly = above? cy-9 : cy+16;
       var anchor = cx>W-60?'end':'middle';
-      g+=shape+'<text class="pt" x="'+cx+'" y="'+ly+'" text-anchor="'+anchor+'">'+p.t+'</text>';
+      g+='<g class="mk" data-t="'+p.t+'" tabindex="0" role="button" aria-label="Resaltar '+p.t+'"><circle class="halo" cx="'+cx+'" cy="'+cy+'" r="8.5"/>'+shape+'<text class="pt" x="'+cx+'" y="'+ly+'" text-anchor="'+anchor+'">'+p.t+'</text></g>';
     });
     host.innerHTML='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+o.aria+'">'+g+'</svg>';
   }
@@ -362,6 +397,7 @@ th[title] button,th[title]{cursor:help}
       '<p class="note">† Valor al vencimiento estimado a partir de la TIR publicada por BYMA; confirmar con el prospecto de emisión.</p></div>';
     scatter(document.getElementById('ch-fija'), fixed.map(function(r){return {x:r.days,y:r.tem,t:r.t,sq:r.kind==='BONCAP'};}),
       {f:fcurve,fy:function(v){return pc(v,1);},yl:'TEM',aria:'TEM de LECAP y BONCAP según plazo, con su curva ajustada'});
+    linkSelection(document.getElementById('ch-fija'),document.getElementById('tb-fija'));
     sortable(document.getElementById('tb-fija'),fcols,fixed,'days',1);
 
     // CER
@@ -395,6 +431,7 @@ th[title] button,th[title]{cursor:help}
       '<p class="note">CER de cálculo (10 días hábiles antes de la liquidación): '+nf(cerS,4)+', estimado día a día con el último dato del BCRA, que llega al '+fd(ts(D.cer.refDate))+'. Las filas con — todavía no tienen cargado su CER de emisión, así que muestran precio sin TIR. La TIR de bonos con cupón (TX26, TX28, TX31) no se calcula acá.</p></div>';
     scatter(document.getElementById('ch-cer'), cer.filter(function(r){return r.tir!=null;}).map(function(r){return {x:r.days,y:r.tir,t:r.t,cer:true};}),
       {f:ccurve,fy:function(v){return pc(v,0);},yl:'TIR real anual',aria:'TIR real de bonos CER según plazo, con su curva ajustada'});
+    linkSelection(document.getElementById('ch-cer'),document.getElementById('tb-cer'));
     sortable(document.getElementById('tb-cer'),ccols,cer,'days',1);
 
     // TAMAR / dual

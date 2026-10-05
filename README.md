@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo.png" alt="Curv.ar" width="320"></p>
+
 # Curv.ar
 
 La curva en pesos, sin vueltas.
