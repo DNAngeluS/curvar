@@ -17,7 +17,7 @@ on:
   push:
     # Cambios manuales a la página o a los datos (por ejemplo, un PR del agente): solo redeploy.
     branches: [main]
-    paths: ['index.html', 'data.json', 'extras/**']
+    paths: ['index.html', 'data.json', 'extras/**', 'assets/**']
 
 permissions:
   contents: write
@@ -115,7 +115,7 @@ jobs:
         run: |
           mkdir site
           cp index.html data.json site/
-          cp -r extras site/
+          cp -r extras assets site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

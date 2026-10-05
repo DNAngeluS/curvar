@@ -25,5 +25,5 @@ jobs:
         run: node scripts/check-lanes.mjs "${{ github.head_ref }}" origin/main
       - name: El sitio se arma completo
         run: |
-          mkdir site && cp index.html data.json site/ && cp -r extras site/
+          mkdir site && cp index.html data.json site/ && cp -r extras assets site/
           test -s site/extras/extras.js && test -s site/extras/extras.css

@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset=utf8><title>Curv.ar — Bonos y letras argentinas</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="Bonos, letras y tasas argentinas para comparar rendimientos sin abrir cinco planillas."><meta property="og:title" content="Curv.ar"><meta property="og:description" content="La curva en pesos, sin vueltas. Bonos, letras y tasas argentinas en un solo lugar."><meta property="og:type" content="website"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="es"><head><meta charset=utf8><title>Curv.ar — Bonos y letras argentinas</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="Bonos, letras y tasas argentinas para comparar rendimientos sin abrir cinco planillas."><meta property="og:title" content="Curv.ar"><meta property="og:description" content="La curva en pesos, sin vueltas. Bonos, letras y tasas argentinas en un solo lugar."><meta property="og:type" content="website"><meta property="og:image" content="https://dnangelus.ar/curvar/assets/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><link rel="apple-touch-icon" href="assets/icon-192.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -19,6 +19,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-display);padding-
 .wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
 header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
 h1{font-size:clamp(1.6rem,4.5vw,2.3rem);font-weight:800;letter-spacing:-.02em;line-height:1.05;margin:0;text-wrap:balance}
+h1 img{display:block;height:clamp(40px,9vw,56px);width:auto}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) h1 img{background:#fff;border-radius:8px;padding:4px 10px}}
+:root[data-theme="dark"] h1 img{background:#fff;border-radius:8px;padding:4px 10px}
 .stamp{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);text-align:right}
 .stamp b{color:var(--ink);font-weight:600}
 .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
@@ -89,7 +92,7 @@ th[title] button,th[title]{cursor:help}
 <div class="wrap">
   <header>
     <div>
-      <h1>Curv.ar</h1>
+      <h1><img src="assets/logo.png" width="378" height="120" alt="Curv.ar"></h1>
       <p class="tag">La curva en pesos, sin vueltas.</p>
     </div>
     <div class="stamp"><div id="stamp">Cargando datos…</div><div class="hlinks"><a href="https://github.com/DNAngeluS/curvar" target="_blank" rel="noopener">GitHub</a></div></div>
