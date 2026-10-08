@@ -2,8 +2,9 @@ name: Actualizar datos y publicar
 
 on:
   schedule:
-    # 18:30 en Buenos Aires (UTC-3, sin horario de verano), de lunes a viernes.
-    - cron: '30 21 * * 1-5'
+    # 18:07 en Buenos Aires (UTC-3, sin horario de verano), de lunes a viernes. Minuto impar a propósito:
+    # GitHub demora los cron de las horas y medias horas (el de las 18:30 salía entre 2 y 4 horas tarde).
+    - cron: '7 21 * * 1-5'
   workflow_dispatch:
     inputs:
       force:

@@ -6,12 +6,12 @@ Guía para el agente de Claude (o cualquier persona) que mantiene este repo. La 
 
 | Quién | Qué |
 |---|---|
-| `scripts/update.mjs` (Actions, lun a vie 18:30 Buenos Aires) | Precios de data912, CER y BADLAR del BCRA, fechas `asOf` / `settle`, retiro de vencidos, detección de tickers nuevos, validaciones. |
+| `scripts/update.mjs` (Actions, lun a vie 18:07 Buenos Aires; GitHub puede demorarla horas) | Precios de data912, CER y BADLAR del BCRA, fechas `asOf` / `settle`, retiro de vencidos, detección de tickers nuevos, validaciones. |
 | Agente | Instrumentos nuevos, REM mensual, feriados, reparar el script si una fuente cambió, controlar que la corrida diaria haya salido bien. |
 
 El script **no** agrega instrumentos ni toca la inflación esperada: los reporta en el issue `curva-revision`.
 
-## Rutina diaria (después de las 18:45)
+## Rutina diaria (después de la corrida de Actions; si no salió, dispararla con `gh workflow run update.yml`)
 
 1. `gh run list --workflow update.yml --limit 3`. Si la última corrida de hoy no está en `success`, ir a "Si falló una fuente".
 2. `gh issue list --label curva-revision --state open` y `--label curva-fallo`. Resolver lo que haya y cerrar el issue con un comentario de lo hecho.
