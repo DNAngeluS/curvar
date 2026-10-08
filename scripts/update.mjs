@@ -8,7 +8,7 @@
 import { readFile, writeFile, appendFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { baNow, buildPanel, marketClosedToday, parseBcra, renderReport, updateData } from './lib.mjs';
+import { annotation, baNow, buildPanel, checkEmiAgainstCer, emiCerRange, marketClosedToday, parseBcra, renderReport, updateData } from './lib.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCES = {
@@ -22,14 +22,14 @@ const args = new Set(process.argv.slice(2));
 const dryRun = args.has('--dry-run') || process.env.DRY_RUN === '1' || process.env.DRY_RUN === 'true';
 const force = args.has('--force') || process.env.FORCE === '1' || process.env.FORCE === 'true';
 
-async function getJson(name, tries = 5) {
+async function getJson(name, tries = 5, url = SOURCES[name]) {
   if (process.env.FIXTURE_DIR) {
     return JSON.parse(await readFile(join(process.env.FIXTURE_DIR, `${name}.json`), 'utf8'));
   }
   let last;
   for (let i = 1; i <= tries; i++) {
     try {
-      const res = await fetch(SOURCES[name], {
+      const res = await fetch(url, {
         signal: AbortSignal.timeout(20000),
         headers: { accept: 'application/json', 'user-agent': 'curvar (github.com/DNAngeluS/curvar)' },
       });
@@ -73,12 +73,29 @@ try { badlar = parseBcra(await getJson('badlar')); } catch (e) { bcraWarnings.pu
 const { next, changed, report } = updateData(prev, { panel, cer, badlar }, now, holidaysCfg);
 report.warnings.unshift(...bcraWarnings);
 
+// Verificación de los CER de emisión contra la serie oficial del BCRA. Si el BCRA falla, solo avisa.
+const range = emiCerRange(next.instruments);
+if (range) {
+  try {
+    const url = `https://api.bcra.gob.ar/estadisticas/v4.0/monetarias/30?desde=${range.desde}&hasta=${range.hasta}&limit=1000`;
+    report.review.push(...checkEmiAgainstCer(next.instruments, parseBcra(await getJson('cerhist', 5, url))));
+  } catch (e) {
+    report.warnings.push(`No se pudo verificar el emi contra el BCRA: ${e.message}`);
+  }
+}
+
 const text = renderReport(report, changed);
 console.log(text);
 if (process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY, text);
 
 if (changed && !dryRun) {
   await writeFile(join(ROOT, 'data.json'), JSON.stringify(next, null, 2) + '\n');
+}
+// Anotaciones: se leen por API (check-runs/annotations) aunque los logs no se puedan bajar.
+if (process.env.GITHUB_ACTIONS === 'true') {
+  console.log(annotation('notice', 'Curva en Pesos', `asOf ${report.dates.asOf}, precios actualizados ${report.priceUpdates}, retirados ${report.retired.length}, publicado ${changed && !dryRun}`));
+  for (const w of report.warnings) console.log(annotation('warning', 'Aviso', w));
+  for (const r of report.review) console.log(annotation('warning', 'Requiere revisión', r));
 }
 const needsReview = report.review.length > 0 || report.warnings.length > 0;
 if (needsReview) await writeFile(join(process.cwd(), 'review.md'), text);
