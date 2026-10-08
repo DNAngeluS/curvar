@@ -7,8 +7,8 @@
     "fecha": "2026-10-06"
   },
   "assumptions": {
-    "inflMensual": 1.7,
-    "inflFuente": "REM del BCRA publicado el 04/09/2026, octubre",
+    "inflMensual": 1.6,
+    "inflFuente": "REM del BCRA publicado el 06/10/2026, noviembre",
     "reinvTna": 22.8125
   },
   "cer": {
@@ -99,9 +99,9 @@
       "t": "X30N6",
       "fam": "cer",
       "vto": "2026-11-30",
-      "emi": 661.18067847314,
+      "emi": 659.67889566652,
       "emiIssue": "2025-12-15",
-      "emiCerDate": "2025-12-01"
+      "emiCerDate": "2025-11-28"
     },
     {
       "t": "TZXO6",
@@ -133,17 +133,17 @@
       "t": "TZXA7",
       "fam": "cer",
       "vto": "2027-04-30",
-      "emi": 652.77271946175,
+      "emi": 651.89806244294,
       "emiIssue": "2025-11-28",
-      "emiCerDate": "2025-11-14"
+      "emiCerDate": "2025-11-12"
     },
     {
       "t": "TZXY7",
       "fam": "cer",
       "vto": "2027-05-31",
-      "emi": 661.18067847314,
+      "emi": 659.67889566652,
       "emiIssue": "2025-12-15",
-      "emiCerDate": "2025-12-01"
+      "emiCerDate": "2025-11-28"
     },
     {
       "t": "TZX27",
@@ -155,7 +155,9 @@
       "t": "TZXS7",
       "fam": "cer",
       "vto": "2027-09-30",
-      "emi": 725.8755
+      "emi": 723.05998062192,
+      "emiIssue": "2026-03-31",
+      "emiCerDate": "2026-03-13"
     },
     {
       "t": "TZXO7",
@@ -175,9 +177,9 @@
       "t": "TZXM8",
       "fam": "cer",
       "vto": "2028-03-31",
-      "emi": 725.875485635,
+      "emi": 723.05998062192,
       "emiIssue": "2026-03-31",
-      "emiCerDate": "2026-03-17"
+      "emiCerDate": "2026-03-13"
     },
     {
       "t": "TZX28",
@@ -189,7 +191,9 @@
       "t": "TZXS8",
       "fam": "cer",
       "vto": "2028-09-29",
-      "emi": 725.8755
+      "emi": 723.05998062192,
+      "emiIssue": "2026-03-31",
+      "emiCerDate": "2026-03-13"
     },
     {
       "t": "TZXD8",
@@ -203,9 +207,9 @@
       "t": "TZXM9",
       "fam": "cer",
       "vto": "2029-03-28",
-      "emi": 725.875485635,
+      "emi": 723.05998062192,
       "emiIssue": "2026-03-31",
-      "emiCerDate": "2026-03-17"
+      "emiCerDate": "2026-03-13"
     },
     {
       "t": "TTD26",
@@ -268,6 +272,14 @@
     {
       "t": "TXMJ0",
       "motivo": "bono CER con cupón, fuera del alcance de la página"
+    },
+    {
+      "t": "TO26",
+      "motivo": "Bonte 2026 (bono del Tesoro en pesos a tasa fija con cupones, vto oct-2026): no es LECAP/BONCAP, fuera del alcance de la página"
+    },
+    {
+      "t": "TY30P",
+      "motivo": "Bonte 2030 en pesos a tasa fija con cupones, suscripto en dólares: fuera del alcance de la página"
     }
   ],
   "prices": {
@@ -426,6 +438,11 @@
       "n": "REM del BCRA",
       "u": "https://www.bcra.gob.ar/PublicacionesEstadisticas/Relevamiento_Expectativas_de_Mercado.asp",
       "uso": "inflación esperada"
+    },
+    {
+      "n": "Calendario de feriados nacionales y días no laborables 2026 (Infobae, según el cronograma oficial); 2027 parcial (La Capital)",
+      "u": "https://www.argentina.gob.ar/feriados",
+      "uso": "días hábiles para el rezago del CER (10 días hábiles)"
     }
   ]
 }
