@@ -1,0 +1,36 @@
+name: Consulta BCRA
+
+# Para el agente: trae una serie del BCRA desde GitHub Actions (donde la API responde) y la deja en anotaciones
+# del job. Leer con: gh api repos/<repo>/check-runs/<id>/annotations  (el id del job sale de gh api .../actions/runs/<run>/jobs).
+on:
+  workflow_dispatch:
+    inputs:
+      variable:
+        description: 'cer, badlar o el id numérico de la variable'
+        required: true
+        default: cer
+      desde:
+        description: 'Desde (YYYY-MM-DD)'
+        required: true
+      hasta:
+        description: 'Hasta (YYYY-MM-DD)'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  consulta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Consultar
+        env:
+          VARIABLE: ${{ inputs.variable }}
+          DESDE: ${{ inputs.desde }}
+          HASTA: ${{ inputs.hasta }}
+        run: node scripts/consulta-bcra.mjs "$VARIABLE" "$DESDE" "$HASTA"

@@ -62,6 +62,39 @@ export function checkEmi(instruments, holidays) {
   return { review, warnings };
 }
 
+/**
+ * Compara cada emi con el valor oficial del CER (variable 30 del BCRA) en su emiCerDate.
+ * @param {object[]} instruments
+ * @param {{fecha: string, valor: number}[]} series serie del BCRA que cubre las fechas de emisión
+ * @returns {string[]} mensajes para revisión
+ */
+export function checkEmiAgainstCer(instruments, series, tolerance = 1e-6) {
+  const byDate = new Map(series.map((r) => [r.fecha, r.valor]));
+  const review = [];
+  for (const ins of instruments) {
+    if (ins.fam !== 'cer' || ins.emi == null || !ins.emiCerDate) continue;
+    const oficial = byDate.get(ins.emiCerDate);
+    if (oficial == null) {
+      review.push(`${ins.t}: el BCRA no devolvió CER para ${ins.emiCerDate}, no se pudo verificar el emi.`);
+    } else if (Math.abs(ins.emi / oficial - 1) > tolerance) {
+      review.push(`${ins.t}: emi ${ins.emi} no coincide con el CER oficial del ${ins.emiCerDate} (${oficial}).`);
+    }
+  }
+  return review;
+}
+
+/** Rango de fechas de CER de emisión cargadas, o null si no hay ninguna. */
+export function emiCerRange(instruments) {
+  const dates = instruments.filter((i) => i.fam === 'cer' && i.emi != null && i.emiCerDate).map((i) => i.emiCerDate).sort();
+  return dates.length ? { desde: dates[0], hasta: dates[dates.length - 1] } : null;
+}
+
+/** Línea de comando de workflow de GitHub Actions (anotación visible por API sin bajar logs). */
+export function annotation(level, title, message) {
+  const esc = (t) => String(t).replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+  return `::${level} title=${esc(title).replace(/:/g, '%3A').replace(/,/g, '%2C')}::${esc(message)}`;
+}
+
 /** Fecha y hora actuales en Buenos Aires. */
 export function baNow(date = new Date()) {
   const parts = new Intl.DateTimeFormat('en-CA', {

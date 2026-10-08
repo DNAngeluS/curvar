@@ -21,7 +21,7 @@ Si un cambio estético necesita tocar `index.html` (por ejemplo, reordenar el en
 4. **Antes de pedir el merge**, quien cambia el tablero corre la prueba de humo en navegador (`npm run smoke`) y compara contra comparatasas.ar según el RUNBOOK. El PR resume qué cambió y qué evidencia hay.
 5. **Cambios en `index.html` que alteren un número** (cálculo, convención, fórmula) llevan explicación en el PR de qué cambia y por qué, y un caso verificable contra una fuente externa.
 6. **Los extras no pueden ensuciar el tablero**: sin scripts de terceros que lean datos, sin pop-ups encima de la tabla, sin analítica que no esté descripta en el README. Los botones de donación quedan en el pie.
-7. **`update.yml` es el pipeline de publicación**: el agente puede proponer cambios, pero van siempre por PR y los mergea el dueño; nunca se pushean directo a `main`.
+7. **`update.yml` es el pipeline de publicación**: los cambios van siempre por PR, se prueban con una corrida manual desde la rama y nunca se pushean directo a `main`.
 
 ## Ciclo de un cambio
 
@@ -56,9 +56,9 @@ CI verde + revisión → merge → update.yml despliega solo
 |---|---|---|---|
 | Precios, CER, BADLAR, fechas, vencidos | ✔ diario | controla | |
 | Instrumentos nuevos, REM, feriados | reporta en issue | ✔ resuelve (RUNBOOK) | |
-| Reparar una fuente caída | abre `curva-fallo` | ✔ PR `fix/…` | revisa y mergea |
-| Funcionalidad nueva | | ✔ PR `feat/…` / `site/…` | decide y mergea |
-| `.github/workflows/update.yml` | | ✔ PR con el cambio | revisa y mergea |
+| Reparar una fuente caída | abre `curva-fallo` | ✔ PR `fix/…` y merge | |
+| Funcionalidad nueva | | ✔ PR `feat/…` / `site/…` | decide; mergea el agente salvo que se desarrolle en conjunto |
+| `.github/workflows/` | | ✔ PR, prueba y merge | |
 | Publicar / revertir | despliega al mergear | | ✔ `git revert` del commit en `main` |
 
 ## Revertir

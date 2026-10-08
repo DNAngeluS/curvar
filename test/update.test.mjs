@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { buildPanel, businessDaysBefore, checkEmi, classifyTicker, computeDates, parseBcra, pickPrice, updateData } from '../scripts/lib.mjs';
+import { annotation, buildPanel, businessDaysBefore, checkEmi, checkEmiAgainstCer, classifyTicker, emiCerRange, computeDates, parseBcra, pickPrice, updateData } from '../scripts/lib.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const prev = JSON.parse(readFileSync(join(ROOT, 'data.json'), 'utf8'));
@@ -194,4 +194,30 @@ test('config/holidays.json: ordenado, sin duplicados y con los días no laborabl
   const d = hol.dates;
   assert.deepEqual(d, [...new Set(d)].sort());
   for (const f of ['2026-10-12', '2026-12-07', '2026-12-08', '2027-03-25']) assert.ok(holSet.has(f), f);
+});
+
+test('checkEmiAgainstCer: compara cada emi con el CER oficial de su fecha', () => {
+  const ins = [
+    { t: 'A', fam: 'cer', emi: 659.67889566652, emiCerDate: '2025-11-28' },
+    { t: 'B', fam: 'cer', emi: 723.06, emiCerDate: '2026-03-13' }, // redondeado: dentro de la tolerancia
+    { t: 'C', fam: 'cer', emi: 700, emiCerDate: '2026-03-17' }, // no coincide
+    { t: 'D', fam: 'cer', emi: 500, emiCerDate: '2026-06-16' }, // sin dato del BCRA
+    { t: 'E', fam: 'cer', emi: 480.1526 }, // sin fecha: no se verifica
+    { t: 'F', fam: 'fixed' },
+  ];
+  const serie = [
+    { fecha: '2025-11-28', valor: 659.67889566652 },
+    { fecha: '2026-03-13', valor: 723.05998062192 },
+    { fecha: '2026-03-17', valor: 725.875485635 },
+  ];
+  const r = checkEmiAgainstCer(ins, serie);
+  assert.equal(r.length, 2);
+  assert.match(r[0], /^C: emi 700 no coincide.*2026-03-17.*725\.875485635/);
+  assert.match(r[1], /^D: el BCRA no devolvió CER para 2026-06-16/);
+});
+
+test('emiCerRange y annotation', () => {
+  assert.deepEqual(emiCerRange([{ fam: 'cer', emi: 1, emiCerDate: '2026-03-13' }, { fam: 'cer', emi: 2, emiCerDate: '2025-11-28' }, { fam: 'cer', emi: null, emiCerDate: '2020-01-01' }]), { desde: '2025-11-28', hasta: '2026-03-13' });
+  assert.equal(emiCerRange([{ fam: 'fixed' }]), null);
+  assert.equal(annotation('warning', 'Aviso: x, y', 'a\nb 100%'), '::warning title=Aviso%3A x%2C y::a%0Ab 100%25');
 });
