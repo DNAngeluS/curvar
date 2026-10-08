@@ -24,6 +24,44 @@ export function prevBusinessDay(iso, holidays) {
   return toIso(t);
 }
 
+export function businessDaysBefore(iso, n, holidays) {
+  let d = iso;
+  for (let i = 0; i < n; i++) d = prevBusinessDay(d, holidays);
+  return d;
+}
+
+/** Rezago del CER de emisión: 10 días hábiles antes de la fecha de emisión (reproduce la TIR de Docta/comparatasas). */
+export const CER_LAG_BUSINESS_DAYS = 10;
+
+/**
+ * Verifica los CER de emisión cargados: emiCerDate debe ser 10 días hábiles antes de emiIssue y dos bonos
+ * que usan la misma fecha de CER deben tener el mismo valor. No valida el valor contra el BCRA: eso lo hace el agente.
+ * @returns {{ review: string[], warnings: string[] }}
+ */
+export function checkEmi(instruments, holidays) {
+  const review = [];
+  const warnings = [];
+  const byDate = new Map();
+  for (const ins of instruments) {
+    if (ins.fam !== 'cer' || ins.emi == null) continue;
+    if (!ins.emiIssue || !ins.emiCerDate) {
+      warnings.push(`${ins.t}: emi sin emiIssue/emiCerDate, no se puede verificar la regla de 10 días hábiles.`);
+      continue;
+    }
+    const expected = businessDaysBefore(ins.emiIssue, CER_LAG_BUSINESS_DAYS, holidays);
+    if (expected !== ins.emiCerDate) {
+      review.push(`${ins.t}: emiCerDate ${ins.emiCerDate} no coincide con 10 días hábiles antes de la emisión (${ins.emiIssue}); esperado ${expected}. Revisar emi y fecha de emisión.`);
+    }
+    const other = byDate.get(ins.emiCerDate);
+    if (other && Math.abs(other.emi / ins.emi - 1) > 1e-9) {
+      review.push(`${ins.t} y ${other.t} usan el CER del ${ins.emiCerDate} con valores distintos (${ins.emi} y ${other.emi}).`);
+    } else if (!other) {
+      byDate.set(ins.emiCerDate, ins);
+    }
+  }
+  return { review, warnings };
+}
+
 /** Fecha y hora actuales en Buenos Aires. */
 export function baNow(date = new Date()) {
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -184,6 +222,13 @@ export function updateData(prev, { panel, cer, badlar }, now, holidaysCfg) {
   for (const ins of next.instruments) {
     if (ins.fam === 'cer' && ins.emi == null) report.review.push(`${ins.t}: CER de emisión (emi) sin determinar.`);
   }
+  const emiCheck = checkEmi(next.instruments, holidays);
+  report.review.push(...emiCheck.review);
+  report.warnings.push(...emiCheck.warnings);
+  // Un precio conservado (sin dato o con salto mayor a 15%) queda viejo hasta que alguien lo resuelva: va a revisión.
+  for (const w of report.warnings) {
+    if (/sin precio en data912|variación mayor a 15%/.test(w)) report.review.push(w);
+  }
   const rem = /(\d{2})\/(\d{2})\/(\d{4})/.exec(next.assumptions?.inflFuente ?? '');
   if (rem) {
     const days = (toTs(dates.generated) - toTs(`${rem[3]}-${rem[2]}-${rem[1]}`)) / DAY;
@@ -208,7 +253,8 @@ export function renderReport(report, changed) {
   L.push(`- asOf ${report.dates.asOf}, settle ${report.dates.settle}`);
   L.push(`- Precios actualizados: ${report.priceUpdates}`);
   L.push(`- Retirados por vencimiento: ${report.retired.length ? report.retired.join(', ') : 'ninguno'}`);
-  if (report.warnings.length) L.push('', '### Avisos', ...report.warnings.map((w) => `- ${w}`));
+  const soloAviso = report.warnings.filter((w) => !report.review.includes(w));
+  if (soloAviso.length) L.push('', '### Avisos', ...soloAviso.map((w) => `- ${w}`));
   if (report.review.length) L.push('', '### Requiere revisión', ...report.review.map((w) => `- ${w}`));
   return L.join('\n') + '\n';
 }

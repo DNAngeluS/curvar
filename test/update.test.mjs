@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { buildPanel, classifyTicker, computeDates, parseBcra, pickPrice, updateData } from '../scripts/lib.mjs';
+import { buildPanel, businessDaysBefore, checkEmi, classifyTicker, computeDates, parseBcra, pickPrice, updateData } from '../scripts/lib.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const prev = JSON.parse(readFileSync(join(ROOT, 'data.json'), 'utf8'));
@@ -110,6 +110,7 @@ test('updateData: salto mayor a 15% conserva el precio anterior', () => {
   const { next, report } = updateData(prev, { panel: panelOf(r), cer: CER, badlar: BADLAR }, FRI_CLOSE, hol);
   assert.equal(next.prices.S30O6.p, prev.prices.S30O6.p);
   assert.ok(report.warnings.some((w) => w.startsWith('S30O6')));
+  assert.ok(report.review.some((w) => w.startsWith('S30O6')), 'un precio conservado queda para revisión');
 });
 
 test('updateData: precios iguales a los publicados no generan cambios', () => {
@@ -158,4 +159,39 @@ test('script de punta a punta con fixtures (dry-run)', () => {
   assert.equal(early.status, 0, early.stderr);
   assert.match(early.stdout, /Fuera de ventana/);
   assert.deepEqual(prev, JSON.parse(readFileSync(join(ROOT, 'data.json'), 'utf8')), 'dry-run no escribe');
+});
+
+test('businessDaysBefore: salta fines de semana y feriados', () => {
+  assert.equal(businessDaysBefore('2025-12-15', 10, holSet), '2025-11-28'); // feriado 08/12
+  assert.equal(businessDaysBefore('2025-11-28', 10, holSet), '2025-11-12'); // feriados 21/11 y 24/11
+  assert.equal(businessDaysBefore('2026-03-31', 10, holSet), '2026-03-13'); // feriados 23/03 y 24/03
+  assert.equal(businessDaysBefore('2026-06-30', 10, holSet), '2026-06-16');
+  assert.equal(businessDaysBefore('2026-08-14', 10, holSet), '2026-07-31');
+});
+
+test('checkEmi: acepta fechas correctas y detecta las que no siguen la regla', () => {
+  const ok = [
+    { t: 'A', fam: 'cer', emi: 659.67889566652, emiIssue: '2025-12-15', emiCerDate: '2025-11-28' },
+    { t: 'B', fam: 'cer', emi: 659.67889566652, emiIssue: '2025-12-15', emiCerDate: '2025-11-28' },
+  ];
+  assert.deepEqual(checkEmi(ok, holSet), { review: [], warnings: [] });
+  const viejo = [{ t: 'C', fam: 'cer', emi: 661.18, emiIssue: '2025-12-15', emiCerDate: '2025-12-01' }]; // 14 días corridos
+  assert.match(checkEmi(viejo, holSet).review[0], /^C: emiCerDate 2025-12-01 no coincide.*esperado 2025-11-28/);
+  const distinto = [ok[0], { ...ok[1], t: 'D', emi: 700 }];
+  assert.match(checkEmi(distinto, holSet).review[0], /D y A usan el CER del 2025-11-28 con valores distintos/);
+  const sinFechas = [{ t: 'E', fam: 'cer', emi: 480.1526 }, { t: 'F', fam: 'cer', emi: null }, { t: 'G', fam: 'fixed' }];
+  const r = checkEmi(sinFechas, holSet);
+  assert.equal(r.review.length, 0);
+  assert.equal(r.warnings.length, 1);
+});
+
+test('data.json: los CER de emisión cargados siguen la regla de 10 días hábiles', () => {
+  const r = checkEmi(prev.instruments, holSet);
+  assert.deepEqual(r.review, []);
+});
+
+test('config/holidays.json: ordenado, sin duplicados y con los días no laborables conocidos', () => {
+  const d = hol.dates;
+  assert.deepEqual(d, [...new Set(d)].sort());
+  for (const f of ['2026-10-12', '2026-12-07', '2026-12-08', '2027-03-25']) assert.ok(holSet.has(f), f);
 });
