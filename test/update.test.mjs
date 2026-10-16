@@ -8,7 +8,12 @@ import { spawnSync } from 'node:child_process';
 import { annotation, buildPanel, businessDaysBefore, checkEmi, checkEmiAgainstCer, classifyTicker, emiCerRange, computeDates, parseBcra, pickPrice, updateData } from '../scripts/lib.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const prev = JSON.parse(readFileSync(join(ROOT, 'data.json'), 'utf8'));
+// Los tests de updateData usan una foto fija de data.json (test/fixtures/data.json, del 09/10/2026): con el data.json vivo
+// se rompían solos cuando el script retiraba un instrumento vencido (S16O6, S30O6). El data.json vivo se controla
+// aparte (forma en data.test.mjs, regla de emi más abajo).
+const FIXTURE = join(ROOT, 'test/fixtures/data.json');
+const prev = JSON.parse(readFileSync(FIXTURE, 'utf8'));
+const live = JSON.parse(readFileSync(join(ROOT, 'data.json'), 'utf8'));
 const hol = JSON.parse(readFileSync(join(ROOT, 'config/holidays.json'), 'utf8'));
 const holSet = new Set(hol.dates);
 
@@ -94,7 +99,7 @@ test('updateData: actualización normal', () => {
   assert.equal(next.assumptions.reinvTna, 23.1875);
   assert.deepEqual(Object.keys(next), Object.keys(prev), 'conserva el orden de claves');
   assert.equal(next.prices.S30O6.p, prev.prices.S30O6.p * 1.001);
-  assert.deepEqual(prev, JSON.parse(readFileSync(join(ROOT, 'data.json'), 'utf8')), 'no muta la entrada');
+  assert.deepEqual(prev, JSON.parse(readFileSync(FIXTURE, 'utf8')), 'no muta la entrada');
 });
 
 test('updateData: retira vencidos (vto <= settle)', () => {
@@ -144,6 +149,7 @@ test('updateData: BCRA caído conserva CER y BADLAR y avisa', () => {
 
 test('script de punta a punta con fixtures (dry-run)', () => {
   const dir = mkdtempSync(join(tmpdir(), 'curva-'));
+  const liveBefore = readFileSync(join(ROOT, 'data.json'), 'utf8');
   const bcra = (id, detalle) => ({ status: 200, metadata: { resultset: { count: 1, offset: 0, limit: 3 } }, results: [{ idVariable: id, detalle }] });
   writeFileSync(join(dir, 'notes.json'), JSON.stringify(rows(prev)));
   writeFileSync(join(dir, 'bonds.json'), JSON.stringify([]));
@@ -158,7 +164,7 @@ test('script de punta a punta con fixtures (dry-run)', () => {
   const early = run(['--dry-run'], '2026-10-05T17:00:00Z');
   assert.equal(early.status, 0, early.stderr);
   assert.match(early.stdout, /Fuera de ventana/);
-  assert.deepEqual(prev, JSON.parse(readFileSync(join(ROOT, 'data.json'), 'utf8')), 'dry-run no escribe');
+  assert.equal(readFileSync(join(ROOT, 'data.json'), 'utf8'), liveBefore, 'dry-run no escribe');
 });
 
 test('businessDaysBefore: salta fines de semana y feriados', () => {
@@ -186,7 +192,7 @@ test('checkEmi: acepta fechas correctas y detecta las que no siguen la regla', (
 });
 
 test('data.json: los CER de emisión cargados siguen la regla de 10 días hábiles', () => {
-  const r = checkEmi(prev.instruments, holSet);
+  const r = checkEmi(live.instruments, holSet);
   assert.deepEqual(r.review, []);
 });
 
