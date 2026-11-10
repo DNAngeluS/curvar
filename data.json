@@ -7,8 +7,8 @@
     "fecha": "2026-11-04"
   },
   "assumptions": {
-    "inflMensual": 1.6,
-    "inflFuente": "REM del BCRA publicado el 06/10/2026, noviembre",
+    "inflMensual": 1.8,
+    "inflFuente": "REM del BCRA publicado el 05/11/2026, diciembre",
     "reinvTna": 21.5
   },
   "cer": {
