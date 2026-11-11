@@ -105,17 +105,28 @@ export function baNow(date = new Date()) {
   return { date: `${g('year')}-${g('month')}-${g('day')}`, hour: Number(g('hour')) };
 }
 
-/** True si el mercado ya cerró en un día hábil (17:00 de Buenos Aires en adelante). */
-export function marketClosedToday(now, holidays) {
+/**
+ * Reloj de la rueda: GitHub puede demorar la corrida programada horas, y una que cae entre las 00:00 y las 05:59
+ * de Buenos Aires sigue siendo el cierre del día calendario anterior (fecha de ayer, hora + 24).
+ */
+function closeClock(now) {
   const { date, hour } = baNow(now);
+  if (hour >= 6) return { date, hour };
+  return { date: baNow(new Date(now.getTime() - 6 * 3600 * 1000)).date, hour: hour + 24 };
+}
+
+/** True si el mercado ya cerró en un día hábil (17:00 de Buenos Aires en adelante, hasta las 05:59 del día siguiente). */
+export function marketClosedToday(now, holidays) {
+  const { date, hour } = closeClock(now);
   return hour >= 17 && isBusinessDay(date, holidays);
 }
 
 /** asOf = último día hábil con cierre; settle = siguiente día hábil (T+1); generated = hoy. */
 export function computeDates(now, holidays) {
-  const { date } = baNow(now);
+  const { date: generated } = baNow(now);
+  const { date } = closeClock(now);
   const asOf = marketClosedToday(now, holidays) ? date : prevBusinessDay(date, holidays);
-  return { generated: date, asOf, settle: nextBusinessDay(asOf, holidays) };
+  return { generated, asOf, settle: nextBusinessDay(asOf, holidays) };
 }
 
 /** Precio de una fila de data912: c; si es 0, punto medio bid/ask (o el lado que exista). */
