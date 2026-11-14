@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { annotation, buildPanel, businessDaysBefore, checkEmi, checkEmiAgainstCer, classifyTicker, emiCerRange, computeDates, parseBcra, pickPrice, updateData } from '../scripts/lib.mjs';
+import { annotation, buildPanel, businessDaysBefore, checkEmi, checkEmiAgainstCer, classifyTicker, emiCerRange, computeDates, marketClosedToday, parseBcra, pickPrice, updateData } from '../scripts/lib.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 // Los tests de updateData usan una foto fija de data.json (test/fixtures/data.json, del 09/10/2026): con el data.json vivo
@@ -52,6 +52,17 @@ test('fechas: corrida en feriado no cuenta como cierre', () => {
   const d = computeDates(new Date('2026-10-12T21:30:00Z'), holSet);
   assert.equal(d.asOf, '2026-10-09');
   assert.equal(d.settle, '2026-10-13');
+});
+
+test('fechas: corrida demorada pasada la medianoche cuenta como el cierre del día anterior', () => {
+  const now = new Date('2026-11-10T03:27:00Z'); // martes 00:27 en Buenos Aires (cierre del lunes 09/11)
+  assert.equal(marketClosedToday(now, holSet), true);
+  assert.deepEqual(computeDates(now, holSet), { generated: '2026-11-10', asOf: '2026-11-09', settle: '2026-11-10' });
+});
+test('fechas: de madrugada tras un día no hábil no hay cierre', () => {
+  assert.equal(marketClosedToday(new Date('2026-10-11T03:30:00Z'), holSet), false); // domingo 00:30
+  assert.equal(marketClosedToday(new Date('2026-10-13T03:30:00Z'), holSet), false); // martes 00:30, lunes 12/10 feriado
+  assert.equal(marketClosedToday(new Date('2026-10-05T10:00:00Z'), holSet), false); // lunes 07:00, ya es otro día
 });
 
 test('pickPrice', () => {
